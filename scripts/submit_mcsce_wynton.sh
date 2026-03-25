@@ -14,9 +14,7 @@
 #$ -M joyce.mo@ucsf.edu
 #
 
-# source activate mcsce
-
-export PYTHONPATH="/wynton/home/rotation/jqmo/rotation3/mcsce/src:${PYTHONPATH}"
+source activate mcsce
 
 PDB_LIST="pdb_list.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
