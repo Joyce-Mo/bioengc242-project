@@ -29,7 +29,7 @@ OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
 NCONFS=5
 TEMPERATURE=300.0
 
-python scripts/run_mcsce.py \   
+python scripts/run_mcsce.py \
     --pdb_list "$PDB_LIST" \
     --task_id "$SGE_TASK_ID" \
     --outdir "$OUTDIR" \
