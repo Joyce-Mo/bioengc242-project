@@ -10,8 +10,7 @@
 #$ -o logs/mcsce_$JOB_ID.out
 #$ -e logs/mcsce_$JOB_ID.err
 #$ -r y
-#$ -m be
-#$ -a 
+#$ -m be a 
 #$ -M joyce.mo@ucsf.edu
 #
 # MC-SCE ensemble generation on Wynton (SGE)
