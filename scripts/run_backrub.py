@@ -101,7 +101,8 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
     return output_paths
 
 
-def run_backrub_cli(pdb_path, outdir, n_conformers, n_mc_steps, kT, rosetta_bin):
+def run_backrub_cli(pdb_path, outdir, n_conformers, n_mc_steps, kT, rosetta_bin,
+                    trajectory=False, trajectory_gz=False, trajectory_stride=100):
     """Run Backrub using Rosetta's command-line backrub application."""
     import subprocess
 
@@ -109,17 +110,34 @@ def run_backrub_cli(pdb_path, outdir, n_conformers, n_mc_steps, kT, rosetta_bin)
     out_sub = os.path.join(outdir, stem)
     os.makedirs(out_sub, exist_ok=True)
 
+    # Protocol: Smith & Kortemme (2008)
+    #   10,000 MC trials, 0.6 kT
+    #   75% backbone / 25% sidechain moves
+    #   Dunbrack backbone-dependent rotamer library
+    #   10% of sidechain moves use uniform chi sampling
+    #   Retain lowest scoring structure per trajectory
     cmd = [
         rosetta_bin,
         "-s", pdb_path,
         "-backrub:ntrials", str(n_mc_steps),
         "-nstruct", str(n_conformers),
         "-backrub:mc_kt", str(kT),
+        "-backrub:sm_prob", "0.25",
+        "-backrub:sc_prob_uniform", "0.1",
+        "-backrub:sc_prob_withinrot", "0.0",
+        "-backrub:initial_pack",
         "-out:path:pdb", out_sub,
         "-out:prefix", f"{stem}_backrub_",
         "-ignore_unrecognized_res",
         "-mute", "all",
     ]
+
+    if trajectory:
+        cmd += ["-backrub:trajectory"]
+    if trajectory_gz:
+        cmd += ["-backrub:trajectory_gz"]
+    if trajectory and trajectory_stride:
+        cmd += ["-backrub:trajectory_stride", str(trajectory_stride)]
 
     logger.info(f"Running Rosetta backrub CLI on {stem}: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -143,11 +161,17 @@ def main():
     parser.add_argument("--nconfs", type=int, default=5, help="Number of conformers (default: 5)")
     parser.add_argument("--nsteps", type=int, default=10000, help="MC steps per conformer (default: 10000)")
     parser.add_argument("--kT", type=float, default=0.6, help="Metropolis kT in kcal/mol (default: 0.6)")
+    parser.add_argument("--trajectory", action="store_true",
+                        help="Record a trajectory during backrub simulation")
+    parser.add_argument("--trajectory_gz", action="store_true",
+                        help="Gzip the trajectory output")
+    parser.add_argument("--trajectory_stride", type=int, default=100,
+                        help="Write a trajectory frame every N steps (default: 100)")
     parser.add_argument("--max_angle", type=float, default=10.0,
                         help="Max backrub rotation angle in degrees (default: 10)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
-    parser.add_argument("--mode", choices=["pyrosetta", "cli"], default="pyrosetta",
-                        help="Use PyRosetta API or Rosetta CLI binary (default: pyrosetta)")
+    parser.add_argument("--mode", choices=["pyrosetta", "cli"], default="cli",
+                        help="Use PyRosetta API or Rosetta CLI binary (default: cli)")
     parser.add_argument("--rosetta_bin", type=str, default="backrub",
                         help="Path to Rosetta backrub binary (for --mode cli)")
     args = parser.parse_args()
@@ -164,7 +188,8 @@ def main():
                     args.max_angle, args.seed)
     else:
         run_backrub_cli(pdb_path, args.outdir, args.nconfs, args.nsteps, args.kT,
-                        args.rosetta_bin)
+                        args.rosetta_bin, args.trajectory, args.trajectory_gz,
+                        args.trajectory_stride)
 
 
 if __name__ == "__main__":
