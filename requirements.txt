@@ -1,0 +1,11 @@
+torch>=2.1
+torch_geometric>=2.4
+torch_scatter
+torch_sparse
+biopython>=1.83
+freesasa>=2.2
+numpy
+scipy
+pyyaml
+tqdm
+wandb
