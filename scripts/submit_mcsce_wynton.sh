@@ -13,14 +13,8 @@
 #$ -m be 
 #$ -M joyce.mo@ucsf.edu
 #
-# MC-SCE ensemble generation on Wynton (SGE)
-#
-# Setup:
-#   bash make_pdb_list.sh /path/to/cath20-filtered-foldseek > pdb_list.txt
-#   mkdir -p logs
-#   qsub submit_mcsce_wynton.sh
 
-# conda activate mcsce
+# source activate mcsce
 
 export PYTHONPATH="/wynton/home/rotation/jqmo/rotation3/mcsce/src:${PYTHONPATH}"
 

@@ -46,8 +46,8 @@ def get_pdb_path(args):
 
 def run_mcsce(pdb_path, outdir, n_conformers, temperature, n_trials):
     """Run MCSCE on a single PDB file."""
-    from mcsce.libs.libparse import mk_folder
-    from mcsce.core.side_chain_builder import create_side_chain_ensemble
+    from MCSCE.libs.libparse import mk_folder
+    from MCSCE.core.side_chain_builder import create_side_chain_ensemble
 
     stem = Path(pdb_path).stem
     out_sub = os.path.join(outdir, stem)
