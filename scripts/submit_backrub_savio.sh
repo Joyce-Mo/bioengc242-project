@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=08:00:00
 #SBATCH --mem=4G
-#SBATCH --qos=savio_debug
+#SBATCH --qos=savio_normal
 #SBATCH --output=logs/backrub_03252026.out
 #SBATCH --error=logs/backrub_03252026.err
 #SBATCH --mail-type=all
@@ -15,7 +15,7 @@
 
 
 # Setup:
-#   bash make_pdb_list.sh /path/to/cath20-filtered-foldseek > pdb_list.txt
+#   bash scripts/make_pdb_list.sh /path/to/cath20-filtered-foldseek > pdb_list.txt
 #   mkdir -p logs
 #   sbatch submit_backrub_savio.sh
 
