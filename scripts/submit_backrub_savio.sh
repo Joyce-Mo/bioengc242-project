@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=backrub
 #SBATCH --account=ic_chem242
-#SBATCH --partition=savio3
+#SBATCH --partition=savio3_htc
 #SBATCH --array=1-100%200
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
