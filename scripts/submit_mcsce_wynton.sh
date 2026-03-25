@@ -2,7 +2,7 @@
 #$ -S /bin/bash
 #$ -N mcsce
 #$ -cwd
-#$ -t 1-13129
+##$ -t 1-13129
 #$ -tc 200
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
@@ -21,6 +21,8 @@
 #   qsub submit_mcsce_wynton.sh
 
 # conda activate mcsce
+
+export PYTHONPATH="/wynton/home/rotation/jqmo/rotation3/mcsce/src:${PYTHONPATH}"
 
 PDB_LIST="pdb_list.txt"
 OUTDIR="ensembles/mcsce"
