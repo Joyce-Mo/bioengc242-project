@@ -46,7 +46,7 @@ def get_pdb_path(args):
 
 
 def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
-                repack=False):
+                repack=False, trajectory_stride=100):
     """Run Backrub on a single PDB following Smith & Kortemme (2008).
 
     Protocol:
@@ -55,6 +55,8 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
       3. Backrub MC with 75% backbone / 25% sidechain moves, Dunbrack rotamers,
          10% uniform chi sampling. Retains lowest-scoring structure per trajectory.
       4. Post-backrub two-stage minimization on each conformer
+
+    Energy trajectories are saved to <outdir>/<stem>/trajectory_*.csv
     """
     import pyrosetta
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
@@ -81,7 +83,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     initial_score = scorefxn(pose)
     logger.info(f"  Initial score: {initial_score:.1f}")
 
-    # --- Optional: Repack side chains (MC simulated annealing) ---
+    # Optional: Repack side chains (MC simulated annealing) 
     if repack:
         from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
         from pyrosetta.rosetta.core.pack.task import TaskFactory
@@ -122,36 +124,76 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
 
     # --- Backrub MC sampling ---
-    # 75% backbone / 25% sidechain, 10% uniform chi, Dunbrack rotamers
-    from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
+    # Smith & Kortemme (2008): 75% backbone / 25% sidechain moves,
+    # Dunbrack rotamers, 10% uniform chi sampling, retain lowest-scoring.
+    from pyrosetta.rosetta.protocols.backrub import BackrubMover
+    from pyrosetta.rosetta.protocols.simple_moves import SidechainMover
+    from pyrosetta.rosetta.protocols.moves import RandomMover, MonteCarlo
 
-    xml = f"""
-    <ROSETTASCRIPTS>
-      <SCOREFXNS><ScoreFunction name="ref" weights="ref2015"/></SCOREFXNS>
-      <MOVERS>
-        <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"
-                         sm_prob="0.25" sc_prob_uniform="0.1"
-                         sc_prob_withinrot="0.0"/>
-      </MOVERS>
-      <PROTOCOLS><Add mover="br"/></PROTOCOLS>
-    </ROSETTASCRIPTS>
-    """
-    objs = XmlObjects.create_from_string(xml)
-    br_mover = objs.get_mover("br")
+    backrub_mover = BackrubMover()
+    backrub_mover.set_max_angle_diversion(max_angle)
+
+    sidechain_mover = SidechainMover()
+    sidechain_mover.set_prob_uniform(0.1)
+    sidechain_mover.set_prob_withinrot(0.0)
+
+    random_mover = RandomMover()
+    random_mover.add_mover(backrub_mover, 0.75)
+    random_mover.add_mover(sidechain_mover, 0.25)
 
     output_paths = []
     for conf_idx in range(n_conformers):
         work_pose = pose.clone()
-        br_mover.apply(work_pose)
+
+        # Set up backrub segments on the work pose
+        backrub_mover.clear_segments()
+        backrub_mover.add_mainchain_segments_from_pose(work_pose)
+
+        mc = MonteCarlo(work_pose, scorefxn, kT)
+
+        # Track energy trajectory during MC sampling
+        trajectory = []
+        for step in range(n_mc_steps):
+            random_mover.apply(work_pose)
+            accepted = mc.boltzmann(work_pose)
+            if step % trajectory_stride == 0:
+                trajectory.append({
+                    "step": step,
+                    "score_current": scorefxn(work_pose),
+                    "score_lowest": mc.lowest_score(),
+                    "accepted": accepted,
+                })
+        mc.recover_low(work_pose)
+        score_after_mc = scorefxn(work_pose)
 
         # --- Post-backrub two-stage minimization ---
         min_chi.apply(work_pose)
+        score_after_min_chi = scorefxn(work_pose)
         min_all.apply(work_pose)
+        score_after_min_all = scorefxn(work_pose)
+
+        # Append minimization stages to trajectory
+        trajectory.append({"step": "post_mc_lowest", "score_current": score_after_mc,
+                           "score_lowest": score_after_mc, "accepted": True})
+        trajectory.append({"step": "post_min_chi", "score_current": score_after_min_chi,
+                           "score_lowest": score_after_min_chi, "accepted": True})
+        trajectory.append({"step": "post_min_all", "score_current": score_after_min_all,
+                           "score_lowest": score_after_min_all, "accepted": True})
+
+        # Save trajectory CSV
+        import csv
+        traj_path = os.path.join(out_sub, f"trajectory_{conf_idx:03d}.csv")
+        with open(traj_path, "w", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=["step", "score_current", "score_lowest", "accepted"])
+            writer.writeheader()
+            writer.writerows(trajectory)
 
         out_path = os.path.join(out_sub, f"{stem}_backrub_{conf_idx:03d}.pdb")
         work_pose.dump_pdb(out_path)
         output_paths.append(out_path)
-        logger.info(f"  Conformer {conf_idx}: score={scorefxn(work_pose):.1f} -> {out_path}")
+        logger.info(f"  Conformer {conf_idx}: MC={score_after_mc:.1f} -> "
+                     f"min_chi={score_after_min_chi:.1f} -> "
+                     f"min_all={score_after_min_all:.1f} -> {out_path}")
 
     return output_paths
 
@@ -242,7 +284,8 @@ def main():
 
     if args.mode == "pyrosetta":
         run_backrub(pdb_path, args.outdir, args.nconfs, args.nsteps, args.kT,
-                    args.max_angle, args.seed, repack=args.repack)
+                    args.max_angle, args.seed, repack=args.repack,
+                    trajectory_stride=args.trajectory_stride)
     else:
         run_backrub_cli(pdb_path, args.outdir, args.nconfs, args.nsteps, args.kT,
                         args.rosetta_bin, args.trajectory, args.trajectory_gz,
