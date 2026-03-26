@@ -3,9 +3,8 @@
 #$ -N backrub
 #$ -cwd
 #$ -t 1-30
-
 #$ -tc 200
-#$ -l h_rt=02:00:00
+#$ -l h_rt=04:00:00
 #$ -l mem_free=8G
 #$ -o logs/backrub_03252026_$JOB_ID.out
 #$ -e logs/backrub_03252026_$JOB_ID.err

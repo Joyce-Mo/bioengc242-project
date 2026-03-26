@@ -45,10 +45,21 @@ def get_pdb_path(args):
     sys.exit(1)
 
 
-def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed):
-    """Run Backrub on a single PDB file using PyRosetta."""
+def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
+                repack=False):
+    """Run Backrub on a single PDB following Smith & Kortemme (2008).
+
+    Protocol:
+      1. (Optional) Repack all side chains via MC simulated annealing
+      2. Two-stage minimization: (a) side chains only, (b) side chains + backbone
+      3. Backrub MC with 75% backbone / 25% sidechain moves, Dunbrack rotamers,
+         10% uniform chi sampling. Retains lowest-scoring structure per trajectory.
+      4. Post-backrub two-stage minimization on each conformer
+    """
     import pyrosetta
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
+    from pyrosetta.rosetta.protocols.minimization_packing import MinMover
+    from pyrosetta.rosetta.core.kinematics import MoveMap
 
     pyrosetta.init(
         "-ignore_unrecognized_res -mute all "
@@ -66,18 +77,61 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
 
     pose = pyrosetta.pose_from_pdb(pdb_path)
     scorefxn = ScoreFunctionFactory.create_score_function("ref2015")
-    scorefxn(pose)  # score once to initialize energies
 
-    # Use RosettaScripts XML to configure BackrubProtocol — the Python
-    # BackrubProtocol class lacks set_mc_kt/set_ntrials setters in
-    # PyRosetta 2024.39, so XML is the reliable cross-version approach.
+    initial_score = scorefxn(pose)
+    logger.info(f"  Initial score: {initial_score:.1f}")
+
+    # --- Optional: Repack side chains (MC simulated annealing) ---
+    if repack:
+        from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
+        from pyrosetta.rosetta.core.pack.task import TaskFactory
+        from pyrosetta.rosetta.core.pack.task.operation import (
+            RestrictToRepacking, IncludeCurrent,
+        )
+        tf = TaskFactory()
+        tf.push_back(RestrictToRepacking())
+        tf.push_back(IncludeCurrent())
+        packer = PackRotamersMover()
+        packer.score_function(scorefxn)
+        packer.task_factory(tf)
+        packer.apply(pose)
+        logger.info(f"  Post-repack score: {scorefxn(pose):.1f}")
+
+    # --- Stage 1: Minimize side chains only ---
+    mm_chi = MoveMap()
+    mm_chi.set_bb(False)
+    mm_chi.set_chi(True)
+    min_chi = MinMover()
+    min_chi.movemap(mm_chi)
+    min_chi.score_function(scorefxn)
+    min_chi.min_type("lbfgs_armijo_nonmonotone")
+    min_chi.tolerance(0.01)
+    min_chi.apply(pose)
+    logger.info(f"  Post-minimize (chi only): {scorefxn(pose):.1f}")
+
+    # --- Stage 2: Minimize side chains + backbone ---
+    mm_all = MoveMap()
+    mm_all.set_bb(True)
+    mm_all.set_chi(True)
+    min_all = MinMover()
+    min_all.movemap(mm_all)
+    min_all.score_function(scorefxn)
+    min_all.min_type("lbfgs_armijo_nonmonotone")
+    min_all.tolerance(0.01)
+    min_all.apply(pose)
+    logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
+
+    # --- Backrub MC sampling ---
+    # 75% backbone / 25% sidechain, 10% uniform chi, Dunbrack rotamers
     from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
 
     xml = f"""
     <ROSETTASCRIPTS>
       <SCOREFXNS><ScoreFunction name="ref" weights="ref2015"/></SCOREFXNS>
       <MOVERS>
-        <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"/>
+        <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"
+                         sm_prob="0.25" sc_prob_uniform="0.1"
+                         sc_prob_withinrot="0.0"/>
       </MOVERS>
       <PROTOCOLS><Add mover="br"/></PROTOCOLS>
     </ROSETTASCRIPTS>
@@ -89,6 +143,10 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
     for conf_idx in range(n_conformers):
         work_pose = pose.clone()
         br_mover.apply(work_pose)
+
+        # --- Post-backrub two-stage minimization ---
+        min_chi.apply(work_pose)
+        min_all.apply(work_pose)
 
         out_path = os.path.join(out_sub, f"{stem}_backrub_{conf_idx:03d}.pdb")
         work_pose.dump_pdb(out_path)
@@ -166,6 +224,8 @@ def main():
                         help="Write a trajectory frame every N steps (default: 100)")
     parser.add_argument("--max_angle", type=float, default=10.0,
                         help="Max backrub rotation angle in degrees (default: 10)")
+    parser.add_argument("--repack", action="store_true",
+                        help="Repack all side chains (MC simulated annealing) before minimization")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
     parser.add_argument("--mode", choices=["pyrosetta", "cli"], default="cli",
                         help="Use PyRosetta API or Rosetta CLI binary (default: cli)")
@@ -182,7 +242,7 @@ def main():
 
     if args.mode == "pyrosetta":
         run_backrub(pdb_path, args.outdir, args.nconfs, args.nsteps, args.kT,
-                    args.max_angle, args.seed)
+                    args.max_angle, args.seed, repack=args.repack)
     else:
         run_backrub_cli(pdb_path, args.outdir, args.nconfs, args.nsteps, args.kT,
                         args.rosetta_bin, args.trajectory, args.trajectory_gz,

@@ -46,8 +46,11 @@ def get_pdb_path(args):
 
 def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
     """Run MCSCE on a single PDB file."""
+    from functools import partial
     from mcsce.libs.libstructure import Structure
-    from mcsce.core.side_chain_builder import create_side_chain_ensemble
+    from mcsce.core.side_chain_builder import initialize_func_calc, create_side_chain_ensemble
+    from mcsce.core.build_definitions import forcefields
+    from mcsce.libs.libenergy import prepare_energy_function
 
     stem = Path(pdb_path).stem
     out_sub = os.path.join(outdir, stem)
@@ -59,6 +62,15 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
         structure = Structure(pdb_path)
         structure.build()
         structure = structure.remove_side_chains()
+
+        # Initialize energy calculators (required before ensemble generation)
+        ff = forcefields["Amberff14SB"]
+        ff_obj = ff(Cterminal='OXT', Nterminal='HN')
+        initialize_func_calc(
+            partial(prepare_energy_function, batch_size=16,
+                    forcefield=ff_obj, terms=["lj", "clash", "coulomb"]),
+            structure=structure,
+        )
 
         create_side_chain_ensemble(
             structure=structure,
