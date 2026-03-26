@@ -18,7 +18,7 @@ source activate mcsce
 
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
-NCONFS=5
+NCONFS=100
 
 # Get the PDB path for this array task
 PDB_PATH=$(sed -n "${SGE_TASK_ID}p" "$PDB_LIST")
