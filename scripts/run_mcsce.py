@@ -44,8 +44,9 @@ def get_pdb_path(args):
     sys.exit(1)
 
 
-def run_mcsce(pdb_path, outdir, n_conformers, temperature, n_trials, failed_log=None):
+def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
     """Run MCSCE on a single PDB file."""
+    from mcsce.libs.libstructure import Structure
     from mcsce.core.side_chain_builder import create_side_chain_ensemble
 
     stem = Path(pdb_path).stem
@@ -55,14 +56,17 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, n_trials, failed_log=
     logger.info(f"Running MC-SCE on {stem} ({n_conformers} conformers, T={temperature}K)")
 
     try:
+        structure = Structure(pdb_path)
+        structure.build()
+        structure = structure.remove_side_chains()
+
         create_side_chain_ensemble(
-            input_pdb=pdb_path,
-            n_conf=n_conformers,
-            output_folder=out_sub,
+            structure=structure,
+            n_conformations=n_conformers,
             temperature=temperature,
-            n_trials=n_trials,
+            save_path=out_sub,
         )
-    except (IndexError, ValueError) as e:
+    except (IndexError, ValueError, RuntimeError) as e:
         logger.error(f"MC-SCE failed on {stem}: {e}")
         if failed_log:
             with open(failed_log, "a") as fh:
@@ -84,8 +88,6 @@ def main():
     parser.add_argument("--nconfs", type=int, default=5, help="Number of conformers (default: 5)")
     parser.add_argument("--temperature", type=float, default=300.0,
                         help="Sampling temperature in Kelvin (default: 300)")
-    parser.add_argument("--n_trials", type=int, default=10,
-                        help="Rosenbluth trial moves per residue (default: 10)")
     parser.add_argument("--failed_log", type=str, default=None,
                         help="File to append failed PDB paths to")
     args = parser.parse_args()
@@ -97,7 +99,7 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
     run_mcsce(pdb_path, args.outdir, args.nconfs, args.temperature,
-              args.n_trials, args.failed_log)
+              failed_log=args.failed_log)
 
 
 if __name__ == "__main__":
