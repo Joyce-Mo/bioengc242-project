@@ -84,7 +84,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
         backrub.set_max_angle_disp_4(math.radians(max_angle * 0.5))
         backrub.set_max_angle_disp_7(math.radians(max_angle))
         backrub.set_max_angle_disp_slope(0.0)
-        backrub.add_mainchain_segments()
+        backrub.add_mainchain_segments(work_pose)
 
         # Monte Carlo with Metropolis criterion
         mc = pyrosetta.MonteCarlo(work_pose, scorefxn, kT)

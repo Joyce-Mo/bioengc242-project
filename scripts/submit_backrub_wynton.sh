@@ -2,13 +2,13 @@
 #$ -S /bin/bash
 #$ -N backrub
 #$ -cwd
-#$ -t 1-50
+#$ -t 1-30
 #$ -tc 200
 #$ -l h_rt=02:00:00
 #$ -l mem_free=4G
 #$ -o logs/backrub_03252026_$JOB_ID.out
 #$ -e logs/backrub_03252026_$JOB_ID.err
-#
+# 
 
 source activate mcsce
 
