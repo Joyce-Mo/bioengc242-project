@@ -68,38 +68,27 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
     scorefxn = ScoreFunctionFactory.create_score_function("ref2015")
     scorefxn(pose)  # score once to initialize energies
 
-    # Use BackrubProtocol — it handles BackrubMover setup internally
-    # and avoids segfaults from manual segment configuration
-    try:
-        from pyrosetta.rosetta.protocols.backrub import BackrubProtocol
-        use_protocol = True
-    except ImportError:
-        use_protocol = False
+    # Use RosettaScripts XML to configure BackrubProtocol — the Python
+    # BackrubProtocol class lacks set_mc_kt/set_ntrials setters in
+    # PyRosetta 2024.39, so XML is the reliable cross-version approach.
+    from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
+
+    xml = f"""
+    <ROSETTASCRIPTS>
+      <SCOREFXNS><ScoreFunction name="ref" weights="ref2015"/></SCOREFXNS>
+      <MOVERS>
+        <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"/>
+      </MOVERS>
+      <PROTOCOLS><Add mover="br"/></PROTOCOLS>
+    </ROSETTASCRIPTS>
+    """
+    objs = XmlObjects.create_from_string(xml)
+    br_mover = objs.get_mover("br")
 
     output_paths = []
     for conf_idx in range(n_conformers):
         work_pose = pose.clone()
-
-        if use_protocol:
-            protocol = BackrubProtocol()
-            protocol.set_mc_kt(kT)
-            protocol.set_ntrials(n_mc_steps)
-            protocol.apply(work_pose)
-        else:
-            # Fallback: use XML-based backrub via RosettaScripts
-            xml = f"""
-            <ROSETTASCRIPTS>
-              <SCOREFXNS><ScoreFunction name="ref" weights="ref2015"/></SCOREFXNS>
-              <MOVERS>
-                <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"/>
-              </MOVERS>
-              <PROTOCOLS><Add mover="br"/></PROTOCOLS>
-            </ROSETTASCRIPTS>
-            """
-            from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
-            objs = XmlObjects.create_from_string(xml)
-            mover = objs.get_mover("br")
-            mover.apply(work_pose)
+        br_mover.apply(work_pose)
 
         out_path = os.path.join(out_sub, f"{stem}_backrub_{conf_idx:03d}.pdb")
         work_pose.dump_pdb(out_path)

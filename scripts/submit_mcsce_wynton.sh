@@ -19,17 +19,11 @@ source activate mcsce
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
 NCONFS=100
-
-# Get the PDB path for this array task
-PDB_PATH=$(sed -n "${SGE_TASK_ID}p" "$PDB_LIST")
-STEM=$(basename "$PDB_PATH" .pdb)
-
 FAILED_LOG="logs/mcsce_failed_pdbs.txt"
 
-mcsce "$PDB_PATH" "$NCONFS" \
-    -o "${OUTDIR}/${STEM}" \
-    -m ensemble
-
-if [ $? -ne 0 ]; then
-    echo "$PDB_PATH" >> "$FAILED_LOG"
-fi
+python scripts/run_mcsce.py \
+    --pdb_list "$PDB_LIST" \
+    --task_id "$SGE_TASK_ID" \
+    --outdir "$OUTDIR" \
+    --nconfs "$NCONFS" \
+    --failed_log "$FAILED_LOG"
