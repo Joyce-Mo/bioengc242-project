@@ -1,8 +1,4 @@
-2026-03-25 21:13:14,202 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,205 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,202 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,215 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,220 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -11,7 +7,7 @@
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,220 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -20,7 +16,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,221 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -29,7 +25,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,221 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -38,7 +34,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,222 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -47,8 +43,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,221 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,222 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -57,7 +52,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,223 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -66,7 +61,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,225 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -75,7 +70,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,226 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -84,8 +79,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,233 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,234 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -94,8 +88,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,238 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,240 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -104,16 +97,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,246 [INFO] Running Backrub on 3ossC00_7 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,248 [INFO] Running Backrub on 4yn3B00_6 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,249 [INFO] Running Backrub on 1vjqA00_26 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,249 [INFO] Running Backrub on 3sreA00_30 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,250 [INFO] Running Backrub on 4bszB00_23 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,250 [INFO] Running Backrub on 3mkrA00_3 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,252 [INFO] Running Backrub on 2vgmA01_1 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,254 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,254 [INFO] Running Backrub on 3stjA03_13 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,255 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -122,16 +106,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,255 [INFO] Running Backrub on 3uk2A02_1 (5 conformers, 10000 MC steps, kT=0.6)
-
-2026-03-25 21:13:14,256 [INFO] Running Backrub on 1m1jB03_0_reres (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,257 [INFO] Running Backrub on 3jzjA01_18 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,257 [INFO] Running Backrub on 4ig1A00_19 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,258 [INFO] Running Backrub on 3wx7A01_4 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,259 [INFO] Running Backrub on 1kj6A00_4 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,277 [INFO] Running Backrub on 3s3lA01_4 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,349 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,350 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -140,8 +115,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,357 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,359 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -150,9 +124,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,367 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,367 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,368 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -161,8 +133,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,368 [INFO] Running Backrub on 5ayvA01_6 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,368 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -171,11 +142,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,386 [INFO] Running Backrub on 1vq8200_2 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,387 [INFO] Running Backrub on 1uddA00_6 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,392 [INFO] Running Backrub on 1yb5A02_24 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,572 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,574 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -184,8 +151,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,575 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,576 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -194,8 +160,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,601 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,602 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -204,9 +169,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,608 [INFO] Running Backrub on 2xotB01_2_reres (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,622 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,623 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -215,8 +178,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,626 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:14,627 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -225,38 +187,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:14,629 [INFO] Running Backrub on 1ui5A00_30 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,643 [INFO] Running Backrub on 2f5xA01_21 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,660 [INFO] Running Backrub on 2f76X00_3_reres (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:14,662 [INFO] Running Backrub on 4b79B00_15_reres (5 conformers, 10000 MC steps, kT=0.6)
-/var/spool/sge/wynton/qb3-id317/job_scripts/3280957: line 28: 4192596 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id290/job_scripts/3280957: line 28: 2328032 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id317/job_scripts/3280957: line 28: 4192604 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id317/job_scripts/3280957: line 28: 4192603 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id317/job_scripts/3280957: line 28: 4192602 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440255 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440256 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440252 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440254 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id268/job_scripts/3280957: line 28: 1890055 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440260 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id268/job_scripts/3280957: line 28: 1890054 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id268/job_scripts/3280957: line 28: 1890056 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440253 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id268/job_scripts/3280957: line 28: 1890057 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440250 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440257 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440251 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440259 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu12/job_scripts/3280957: line 28: 1263398 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-idgpu4/job_scripts/3280957: line 28: 440258 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu6/job_scripts/3280957: line 28: 3717416 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu12/job_scripts/3280957: line 28: 1263401 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu12/job_scripts/3280957: line 28: 1263402 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu12/job_scripts/3280957: line 28: 1263407 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/msg-iogpu12/job_scripts/3280957: line 28: 1263408 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-2026-03-25 21:13:27,566 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:27,567 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -265,10 +196,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:27,593 [INFO] Running Backrub on 3uogA01_9 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:33,141 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:33,141 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:33,141 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -277,7 +205,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:33,142 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -286,11 +214,7 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:33,168 [INFO] Running Backrub on 1wtbA00_28 (5 conformers, 10000 MC steps, kT=0.6)
-2026-03-25 21:13:33,170 [INFO] Running Backrub on 2vqeN00_6 (5 conformers, 10000 MC steps, kT=0.6)
-/var/spool/sge/wynton/qb3-id134/job_scripts/3280957: line 28: 2561065 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-2026-03-25 21:13:37,349 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
-2026-03-25 21:13:37,349 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                                 PyRosetta-4                                  │
 │              Created in JHU by Sergey Lyskov and PyRosetta Team              │
 │              (C) Copyright Rosetta Commons Member Institutions               │
@@ -299,7 +223,3 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 │         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
 └──────────────────────────────────────────────────────────────────────────────┘
 PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
-2026-03-25 21:13:37,374 [INFO] Running Backrub on 3buxB01_22_reres (5 conformers, 10000 MC steps, kT=0.6)
-/var/spool/sge/wynton/qb3-id134/job_scripts/3280957: line 28: 2561076 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id134/job_scripts/3280957: line 28: 2561075 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
-/var/spool/sge/wynton/qb3-id134/job_scripts/3280957: line 28: 2561086 Segmentation fault      (core dumped) python scripts/run_backrub.py --pdb_list "$PDB_LIST" --task_id "$SGE_TASK_ID" --outdir "$OUTDIR" --nconfs "$NCONFS" --nsteps "$NSTEPS" --kT "$KT" --mode pyrosetta
