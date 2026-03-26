@@ -48,12 +48,11 @@ def get_pdb_path(args):
 def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed):
     """Run Backrub on a single PDB file using PyRosetta."""
     import pyrosetta
-    from pyrosetta.rosetta.protocols.backrub import BackrubMover
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
-    from pyrosetta.rosetta.utility import vector1_unsigned_long
 
     pyrosetta.init(
         "-ignore_unrecognized_res -mute all "
+        "-ignore_zero_occupancy false "
         f"-run:constant_seed -run:jran {seed}",
         set_logging_handler=None,
     )
@@ -67,31 +66,40 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed)
 
     pose = pyrosetta.pose_from_pdb(pdb_path)
     scorefxn = ScoreFunctionFactory.create_score_function("ref2015")
+    scorefxn(pose)  # score once to initialize energies
+
+    # Use BackrubProtocol — it handles BackrubMover setup internally
+    # and avoids segfaults from manual segment configuration
+    try:
+        from pyrosetta.rosetta.protocols.backrub import BackrubProtocol
+        use_protocol = True
+    except ImportError:
+        use_protocol = False
 
     output_paths = []
     for conf_idx in range(n_conformers):
         work_pose = pose.clone()
 
-        # Configure BackrubMover
-        backrub = BackrubMover()
-        pivot_residues = vector1_unsigned_long()
-        for i in range(1, work_pose.total_residue() + 1):
-            if work_pose.residue(i).is_protein():
-                pivot_residues.append(i)
-        backrub.set_pivot_residues(pivot_residues)
-        backrub.set_min_atoms(7)   # ~2 residue segment
-        backrub.set_max_atoms(34)  # ~8 residue segment
-        backrub.set_max_angle_disp_4(math.radians(max_angle * 0.5))
-        backrub.set_max_angle_disp_7(math.radians(max_angle))
-        backrub.set_max_angle_disp_slope(0.0)
-        backrub.add_mainchain_segments(work_pose)
-
-        # Monte Carlo with Metropolis criterion
-        mc = pyrosetta.MonteCarlo(work_pose, scorefxn, kT)
-        for _ in range(n_mc_steps):
-            backrub.apply(work_pose)
-            mc.boltzmann(work_pose)
-        mc.recover_low(work_pose)
+        if use_protocol:
+            protocol = BackrubProtocol()
+            protocol.set_mc_kt(kT)
+            protocol.set_ntrials(n_mc_steps)
+            protocol.apply(work_pose)
+        else:
+            # Fallback: use XML-based backrub via RosettaScripts
+            xml = f"""
+            <ROSETTASCRIPTS>
+              <SCOREFXNS><ScoreFunction name="ref" weights="ref2015"/></SCOREFXNS>
+              <MOVERS>
+                <BackrubProtocol name="br" mc_kt="{kT}" ntrials="{n_mc_steps}"/>
+              </MOVERS>
+              <PROTOCOLS><Add mover="br"/></PROTOCOLS>
+            </ROSETTASCRIPTS>
+            """
+            from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
+            objs = XmlObjects.create_from_string(xml)
+            mover = objs.get_mover("br")
+            mover.apply(work_pose)
 
         out_path = os.path.join(out_sub, f"{stem}_backrub_{conf_idx:03d}.pdb")
         work_pose.dump_pdb(out_path)
