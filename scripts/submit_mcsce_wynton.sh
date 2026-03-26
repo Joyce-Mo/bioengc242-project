@@ -2,7 +2,7 @@
 #$ -S /bin/bash
 #$ -N mcsce
 #$ -cwd
-#$ -t 1-300000
+#$ -t 1-50
 #$ -tc 200
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
