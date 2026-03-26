@@ -2,28 +2,28 @@
 #$ -S /bin/bash
 #$ -N mcsce
 #$ -cwd
-#$ -t 1-13129
+#$ -t 1-300000
 #$ -tc 200
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_$JOB_ID.out
-#$ -e logs/mcsce_$JOB_ID.err
+#$ -o logs/mcsce_03252026$JOB_ID.out
+#$ -e logs/mcsce_03252026$JOB_ID.err
 #$ -r y
-#$ -m be 
+#$ -m n
 #$ -M joyce.mo@ucsf.edu
 #
 
 source activate mcsce
 
-PDB_LIST="pdb_list.txt"
+PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
 NCONFS=5
-TEMPERATURE=300.0
 
-python scripts/run_mcsce.py \
-    --pdb_list "$PDB_LIST" \
-    --task_id "$SGE_TASK_ID" \
-    --outdir "$OUTDIR" \
-    --nconfs "$NCONFS" \
-    --temperature "$TEMPERATURE"
+# Get the PDB path for this array task
+PDB_PATH=$(sed -n "${SGE_TASK_ID}p" "$PDB_LIST")
+STEM=$(basename "$PDB_PATH" .pdb)
+
+mcsce "$PDB_PATH" "$NCONFS" \
+    -o "${OUTDIR}/${STEM}" \
+    -m ensemble
