@@ -17,7 +17,7 @@ source activate mcsce
 
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
-NCONFS=100
+NCONFS=5
 FAILED_LOG="logs/mcsce_failed_pdbs.txt"
 
 python scripts/run_mcsce.py \
