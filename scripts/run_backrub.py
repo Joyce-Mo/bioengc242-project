@@ -138,8 +138,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     backrub_mover.set_max_angle_disp_7(max_angle)
 
     sidechain_mover = JumpRotamerSidechainMover()
-    sidechain_mover.set_prob_uniform(0.1)
-    sidechain_mover.set_prob_withinrot(0.0)
+    sidechain_mover.set_task_factory(tf)
 
     random_mover = RandomMover()
     random_mover.add_mover(backrub_mover, 0.75)
