@@ -150,8 +150,10 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
         work_pose = pose.clone()
 
         # Set up backrub segments on the work pose
+        backrub_mover.set_input_pose(work_pose)
         backrub_mover.clear_segments()
-        backrub_mover.add_mainchain_segments(work_pose)
+        backrub_mover.add_mainchain_segments_from_options(work_pose)
+        logger.info(f"  Conformer {conf_idx}: {backrub_mover.num_segments()} backrub segments")
 
         mc = MonteCarlo(work_pose, scorefxn, kT)
 
