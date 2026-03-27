@@ -83,23 +83,23 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     initial_score = scorefxn(pose)
     logger.info(f"  Initial score: {initial_score:.1f}")
 
-    # Optional: Repack side chains (MC simulated annealing) 
-    if repack:
-        from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
-        from pyrosetta.rosetta.core.pack.task import TaskFactory
-        from pyrosetta.rosetta.core.pack.task.operation import (
-            RestrictToRepacking, IncludeCurrent,
-        )
-        tf = TaskFactory()
-        tf.push_back(RestrictToRepacking())
-        tf.push_back(IncludeCurrent())
-        packer = PackRotamersMover()
-        packer.score_function(scorefxn)
-        packer.task_factory(tf)
-        packer.apply(pose)
-        logger.info(f"  Post-repack score: {scorefxn(pose):.1f}")
+    # repack all side chains before minimization  
+    from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
+    from pyrosetta.rosetta.core.pack.task import TaskFactory
+    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
+    from pyrosetta.rosetta.core.pack.task.operation.OptH import flip_HNQ 
 
-    # --- Stage 1: Minimize side chains only ---
+    flip_HNQ(True) # allow sidechain flips of HNQ (Dru suggestion)
+    tf = TaskFactory()
+    tf.push_back(RestrictToRepacking())
+    tf.push_back(IncludeCurrent())
+    packer = PackRotamersMover()
+    packer.score_function(scorefxn)
+    packer.task_factory(tf)
+    packer.apply(pose)
+    logger.info(f"Post-repack score: {scorefxn(pose):.1f}")
+
+    # Step 1: Minimize side chains only
     mm_chi = MoveMap()
     mm_chi.set_bb(False)
     mm_chi.set_chi(True)
@@ -111,7 +111,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_chi.apply(pose)
     logger.info(f"  Post-minimize (chi only): {scorefxn(pose):.1f}")
 
-    # --- Stage 2: Minimize side chains + backbone ---
+    # Stage 2: Minimize side chains + backbone
     mm_all = MoveMap()
     mm_all.set_bb(True)
     mm_all.set_chi(True)
@@ -123,11 +123,11 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_all.apply(pose)
     logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
 
-    # --- Backrub MC sampling ---
-    # Smith & Kortemme (2008): 75% backbone / 25% sidechain moves,
+    # Backrub MC sampling 
+    # Smith & Kortemme (2010): 75% backbone / 25% sidechain moves,
     # Dunbrack rotamers, 10% uniform chi sampling, retain lowest-scoring.
     from pyrosetta.rosetta.protocols.backrub import BackrubMover
-    from pyrosetta.rosetta.protocols.simple_moves import SidechainMover
+    from pyrosetta.rosetta.protocols.simple_moves.sidechain_moves import SidechainMover
     from pyrosetta.rosetta.protocols.moves import RandomMover, MonteCarlo
 
     backrub_mover = BackrubMover()
@@ -166,7 +166,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
         mc.recover_low(work_pose)
         score_after_mc = scorefxn(work_pose)
 
-        # --- Post-backrub two-stage minimization ---
+        # Post-backrub two-stage minimization on each conformer
         min_chi.apply(work_pose)
         score_after_min_chi = scorefxn(work_pose)
         min_all.apply(work_pose)
@@ -207,7 +207,7 @@ def run_backrub_cli(pdb_path, outdir, n_conformers, n_mc_steps, kT, rosetta_bin,
     out_sub = os.path.join(outdir, stem)
     os.makedirs(out_sub, exist_ok=True)
 
-    # Protocol: Smith & Kortemme (2008)
+    # Protocol: Smith & Kortemme (2010)
     #   10,000 MC trials, 0.6 kT
     #   75% backbone / 25% sidechain moves
     #   Dunbrack backbone-dependent rotamer library
