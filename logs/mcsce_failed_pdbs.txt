@@ -1,0 +1,3 @@
+/wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/4yn3B00_6_preproc.pdb
+/wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/1vq8200_2_preproc.pdb
+/wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/1vjqA00_26_preproc.pdb
