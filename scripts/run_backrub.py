@@ -66,6 +66,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     pyrosetta.init(
         "-ignore_unrecognized_res -mute all "
         "-ignore_zero_occupancy false "
+        "-flip_HNQ "
         f"-run:constant_seed -run:jran {seed}",
         set_logging_handler=None,
     )
@@ -83,23 +84,24 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     initial_score = scorefxn(pose)
     logger.info(f"  Initial score: {initial_score:.1f}")
 
+    print("Repack side chains before minimization and backrub sampling")
+
     # repack all side chains before minimization  
     from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
     from pyrosetta.rosetta.core.pack.task import TaskFactory
-    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent, OptH
+    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
 
-    opt_h = OptH()
-    opt_h.flip_HNQ(True)  # allow sidechain flips of HNQ (Dru suggestion)
+    # flip_HNQ is set via -flip_HNQ flag in pyrosetta.init()
     tf = TaskFactory()
     tf.push_back(RestrictToRepacking())
     tf.push_back(IncludeCurrent())
-    tf.push_back(opt_h)
     packer = PackRotamersMover()
     packer.score_function(scorefxn)
     packer.task_factory(tf)
     packer.apply(pose)
     logger.info(f"Post-repack score: {scorefxn(pose):.1f}")
 
+    print("begin minimization")
     # Step 1: Minimize side chains only
     mm_chi = MoveMap()
     mm_chi.set_bb(False)
@@ -128,13 +130,14 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     # Smith & Kortemme (2010): 75% backbone / 25% sidechain moves,
     # Dunbrack rotamers, 10% uniform chi sampling, retain lowest-scoring.
     from pyrosetta.rosetta.protocols.backrub import BackrubMover
-    from pyrosetta.rosetta.protocols.simple_moves.sidechain_moves import SidechainMover
+    from pyrosetta.rosetta.protocols.simple_moves.sidechain_moves import JumpRotamerSidechainMover
     from pyrosetta.rosetta.protocols.moves import RandomMover, MonteCarlo
 
     backrub_mover = BackrubMover()
-    backrub_mover.set_max_angle_diversion(max_angle)
+    backrub_mover.set_max_angle_disp_4(max_angle)
+    backrub_mover.set_max_angle_disp_7(max_angle)
 
-    sidechain_mover = SidechainMover()
+    sidechain_mover = JumpRotamerSidechainMover()
     sidechain_mover.set_prob_uniform(0.1)
     sidechain_mover.set_prob_withinrot(0.0)
 
@@ -148,7 +151,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
 
         # Set up backrub segments on the work pose
         backrub_mover.clear_segments()
-        backrub_mover.add_mainchain_segments_from_pose(work_pose)
+        backrub_mover.add_mainchain_segments(work_pose)
 
         mc = MonteCarlo(work_pose, scorefxn, kT)
 
