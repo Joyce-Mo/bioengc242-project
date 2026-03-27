@@ -86,13 +86,14 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     # repack all side chains before minimization  
     from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
     from pyrosetta.rosetta.core.pack.task import TaskFactory
-    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
-    from pyrosetta.rosetta.core.pack.task.operation.OptH import flip_HNQ 
+    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent, OptH
 
-    flip_HNQ(True) # allow sidechain flips of HNQ (Dru suggestion)
+    opt_h = OptH()
+    opt_h.flip_HNQ(True)  # allow sidechain flips of HNQ (Dru suggestion)
     tf = TaskFactory()
     tf.push_back(RestrictToRepacking())
     tf.push_back(IncludeCurrent())
+    tf.push_back(opt_h)
     packer = PackRotamersMover()
     packer.score_function(scorefxn)
     packer.task_factory(tf)
