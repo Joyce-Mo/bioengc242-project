@@ -131,6 +131,78 @@ def preprocess_structure(pdb_path, seed=42):
     return out_path
 
 
+def normalize_pdb_for_amber(pdb_path):
+    """Rename atoms and residues from Rosetta conventions to AMBER/MCSCE conventions.
+
+    Operates on fixed-width PDB columns:
+      - Atom name:    cols 12-16
+      - Residue name: cols 17-20
+
+    Rosetta → AMBER mappings applied:
+      Residue names: HIS_D→HID, HSE→HIE, HSP→HIP, HSD→HID, CYX→CYS, MSE→MET
+      Atom names:    H1→H at N-terminal (non-PRO); remove H1 for N-terminal PRO;
+                     SE→SD for MSE→MET
+    """
+    with open(pdb_path) as f:
+        lines = f.readlines()
+
+    RESNAME_MAP = {
+        'HIS_D': 'HID', 'HSD': 'HID', 'HSE': 'HIE', 'HSP': 'HIP',
+        'CYX': 'CYS', 'CYD': 'CYS', 'MSE': 'MET',
+    }
+
+    out_lines = []
+    first_resnum = None
+    for line in lines:
+        if not line.startswith(('ATOM', 'HETATM')):
+            out_lines.append(line)
+            continue
+
+        atom_name = line[12:16]
+        resname = line[17:20].strip()
+        resnum = line[22:26].strip()
+
+        # Track first residue number (N-terminal)
+        if first_resnum is None:
+            first_resnum = resnum
+
+        # Residue name normalization
+        if resname in RESNAME_MAP:
+            new_resname = RESNAME_MAP[resname]
+            # MSE→MET: also rename SE atom to SD
+            if resname == 'MSE' and atom_name.strip() == 'SE':
+                atom_name = ' SD '
+            line = line[:17] + f"{new_resname:>3}" + line[20:]
+            line = line[:12] + atom_name + line[16:]
+
+        # N-terminal atom naming
+        if resnum == first_resnum and atom_name.strip() == 'H1':
+            if resname == 'PRO' or RESNAME_MAP.get(resname) == 'PRO':
+                continue  # PRO N-term has no H1 in AMBER
+            else:
+                atom_name = ' H  '
+                line = line[:12] + atom_name + line[16:]
+
+        out_lines.append(line)
+
+    out_path = str(Path(pdb_path).parent / f"{Path(pdb_path).stem}_amber.pdb")
+    with open(out_path, 'w') as f:
+        f.writelines(out_lines)
+
+    logger.info(f"  Normalized atom/residue names -> {out_path}")
+    return out_path
+
+
+def _cleanup_temp_files(pdb_path, preprocess):
+    """Remove _amber.pdb and _preproc.pdb temp files."""
+    if pdb_path.endswith("_amber.pdb"):
+        preproc_path = pdb_path.replace("_amber.pdb", ".pdb")
+        if os.path.exists(pdb_path):
+            os.remove(pdb_path)
+        if preprocess and preproc_path.endswith("_preproc.pdb") and os.path.exists(preproc_path):
+            os.remove(preproc_path)
+
+
 def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
               minimize=True, preprocess=False, seed=42):
     """Run MCSCE on a single PDB file.
@@ -141,8 +213,12 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         minimize: If True, run Rosetta cartesian minimization on each
             generated conformer.
     """
+    original_pdb_path = pdb_path
     if preprocess:
         pdb_path = preprocess_structure(pdb_path, seed=seed)
+
+    # Normalize Rosetta atom/residue names to AMBER conventions for MCSCE
+    pdb_path = normalize_pdb_for_amber(pdb_path)
 
     from functools import partial
     from mcsce.libs.libstructure import Structure
@@ -178,16 +254,15 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
             temperature=temperature,
             save_path=out_sub,
         )
-    except (IndexError, ValueError, RuntimeError) as e:
-        logger.error(f"MC-SCE failed on {out_stem}: {e}")
+    except (IndexError, ValueError, RuntimeError, KeyError) as e:
+        logger.error(f"MC-SCE failed on {out_stem}: {type(e).__name__}: {e}")
         if failed_log:
             with open(failed_log, "a") as fh:
-                fh.write(f"{pdb_path}\n")
+                fh.write(f"{original_pdb_path}\n")
+        _cleanup_temp_files(pdb_path, preprocess)
         return []
 
-    # Clean up preprocessed temp file
-    if preprocess and pdb_path.endswith("_preproc.pdb"):
-        os.remove(pdb_path)
+    _cleanup_temp_files(pdb_path, preprocess)
 
     outputs = sorted(Path(out_sub).glob("*.pdb"))
     logger.info(f"Generated {len(outputs)} conformers -> {out_sub}")
