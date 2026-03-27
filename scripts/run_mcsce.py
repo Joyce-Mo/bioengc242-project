@@ -44,8 +44,106 @@ def get_pdb_path(args):
     sys.exit(1)
 
 
-def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
-    """Run MCSCE on a single PDB file."""
+def preprocess_structure(pdb_path, seed=42):
+    """Idealize, repack, and 2-step minimize a structure with HNQ flipping.
+
+    Matches the preprocessing in run_backrub.py:
+      1. Idealize bond geometries
+      2. Repack all side chains
+      3. Enable flip_HNQ
+      4. Minimize chi only
+      5. Minimize chi + backbone
+      6. Disable flip_HNQ
+
+    Returns the path to the preprocessed PDB (written next to the input).
+    """
+    import pyrosetta
+    from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
+    from pyrosetta.rosetta.protocols.minimization_packing import MinMover, PackRotamersMover
+    from pyrosetta.rosetta.core.kinematics import MoveMap
+    from pyrosetta.rosetta.core.pack.task import TaskFactory
+    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
+    from pyrosetta.rosetta.protocols.idealize import IdealizeMover
+    from pyrosetta.rosetta.basic.options import set_boolean_option
+
+    pyrosetta.init(
+        "-ignore_unrecognized_res -mute all "
+        "-ignore_zero_occupancy false "
+        "-corrections:beta_nov16 "
+        f"-run:constant_seed -run:jran {seed}",
+        set_logging_handler=None,
+    )
+
+    stem = Path(pdb_path).stem
+    pose = pyrosetta.pose_from_pdb(pdb_path)
+    scorefxn = ScoreFunctionFactory.create_score_function("beta_nov16")
+
+    logger.info(f"Preprocessing {stem}: initial score {scorefxn(pose):.1f}")
+
+    # 1. Idealize bond geometries
+    IdealizeMover().apply(pose)
+    logger.info(f"  Post-idealize: {scorefxn(pose):.1f}")
+
+    # 2. Repack side chains
+    tf = TaskFactory()
+    tf.push_back(RestrictToRepacking())
+    tf.push_back(IncludeCurrent())
+    packer = PackRotamersMover()
+    packer.score_function(scorefxn)
+    packer.task_factory(tf)
+    packer.apply(pose)
+    logger.info(f"  Post-repack: {scorefxn(pose):.1f}")
+
+    # 3. Enable flip_HNQ for minimization
+    set_boolean_option("packing:flip_HNQ", True)
+
+    # 4. Minimize side chains only
+    mm_chi = MoveMap()
+    mm_chi.set_bb(False)
+    mm_chi.set_chi(True)
+    min_chi = MinMover()
+    min_chi.movemap(mm_chi)
+    min_chi.score_function(scorefxn)
+    min_chi.min_type("lbfgs_armijo_nonmonotone")
+    min_chi.tolerance(0.01)
+    min_chi.apply(pose)
+    logger.info(f"  Post-minimize (chi only): {scorefxn(pose):.1f}")
+
+    # 5. Minimize side chains + backbone
+    mm_all = MoveMap()
+    mm_all.set_bb(True)
+    mm_all.set_chi(True)
+    min_all = MinMover()
+    min_all.movemap(mm_all)
+    min_all.score_function(scorefxn)
+    min_all.min_type("lbfgs_armijo_nonmonotone")
+    min_all.tolerance(0.01)
+    min_all.apply(pose)
+    logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
+
+    # 6. Disable flip_HNQ
+    set_boolean_option("packing:flip_HNQ", False)
+
+    # Write preprocessed PDB next to original
+    out_path = str(Path(pdb_path).parent / f"{stem}_preproc.pdb")
+    pose.dump_pdb(out_path)
+    logger.info(f"  Preprocessed structure -> {out_path}")
+    return out_path
+
+
+def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
+              minimize=True, preprocess=False, seed=42):
+    """Run MCSCE on a single PDB file.
+
+    Args:
+        preprocess: If True, run idealize + repack + 2-step minimize with
+            HNQ flipping on the input structure before MC-SCE.
+        minimize: If True, run Rosetta cartesian minimization on each
+            generated conformer.
+    """
+    if preprocess:
+        pdb_path = preprocess_structure(pdb_path, seed=seed)
+
     from functools import partial
     from mcsce.libs.libstructure import Structure
     from mcsce.core.side_chain_builder import initialize_func_calc, create_side_chain_ensemble
@@ -53,13 +151,15 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
     from mcsce.libs.libenergy import prepare_energy_function
 
     stem = Path(pdb_path).stem
-    out_sub = os.path.join(outdir, stem)
+    # Strip _preproc suffix for output dir naming
+    out_stem = stem.replace("_preproc", "")
+    out_sub = os.path.join(outdir, out_stem)
     os.makedirs(out_sub, exist_ok=True)
 
-    logger.info(f"Running MC-SCE on {stem} ({n_conformers} conformers, T={temperature}K)")
+    logger.info(f"Running MC-SCE on {out_stem} ({n_conformers} conformers, T={temperature}K)")
 
     try:
-        structure = Structure(pdb_path)
+        structure = Structure(Path(pdb_path))
         structure.build()
         structure = structure.remove_side_chains()
 
@@ -79,15 +179,63 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None):
             save_path=out_sub,
         )
     except (IndexError, ValueError, RuntimeError) as e:
-        logger.error(f"MC-SCE failed on {stem}: {e}")
+        logger.error(f"MC-SCE failed on {out_stem}: {e}")
         if failed_log:
             with open(failed_log, "a") as fh:
                 fh.write(f"{pdb_path}\n")
         return []
 
+    # Clean up preprocessed temp file
+    if preprocess and pdb_path.endswith("_preproc.pdb"):
+        os.remove(pdb_path)
+
     outputs = sorted(Path(out_sub).glob("*.pdb"))
     logger.info(f"Generated {len(outputs)} conformers -> {out_sub}")
-    return [str(p) for p in outputs]
+
+    if not minimize or len(outputs) == 0:
+        return [str(p) for p in outputs]
+
+    # Rosetta cartesian energy minimization on each conformer
+    import pyrosetta
+    from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
+    from pyrosetta.rosetta.protocols.minimization_packing import MinMover
+    from pyrosetta.rosetta.core.kinematics import MoveMap
+
+    # Only init if not already initialized by preprocess step
+    if not pyrosetta.rosetta.basic.was_init_called():
+        pyrosetta.init(
+            "-ignore_unrecognized_res -mute all "
+            "-ignore_zero_occupancy false "
+            "-corrections:beta_nov16 "
+            f"-run:constant_seed -run:jran {seed}",
+            set_logging_handler=None,
+        )
+
+    scorefxn_cart = ScoreFunctionFactory.create_score_function("beta_nov16_cart")
+
+    mm = MoveMap()
+    mm.set_bb(True)
+    mm.set_chi(True)
+    mm.set_jump(True)
+
+    min_mover = MinMover()
+    min_mover.movemap(mm)
+    min_mover.score_function(scorefxn_cart)
+    min_mover.min_type("lbfgs_armijo_nonmonotone")
+    min_mover.tolerance(0.01)
+    min_mover.cartesian(True)
+
+    minimized_paths = []
+    for pdb_out in outputs:
+        pose = pyrosetta.pose_from_pdb(str(pdb_out))
+        score_before = scorefxn_cart(pose)
+        min_mover.apply(pose)
+        score_after = scorefxn_cart(pose)
+        pose.dump_pdb(str(pdb_out))  # overwrite with minimized structure
+        logger.info(f"  Minimized {pdb_out.name}: {score_before:.1f} -> {score_after:.1f}")
+        minimized_paths.append(str(pdb_out))
+
+    return minimized_paths
 
 
 def main():
@@ -102,6 +250,13 @@ def main():
                         help="Sampling temperature in Kelvin (default: 300)")
     parser.add_argument("--failed_log", type=str, default=None,
                         help="File to append failed PDB paths to")
+    parser.add_argument("--no_minimize", action="store_true",
+                        help="Skip Rosetta cartesian minimization after MC-SCE")
+    parser.add_argument("--preprocess", action="store_true",
+                        help="Run idealize + repack + 2-step minimize with HNQ flipping "
+                             "on the input structure before MC-SCE (for unminimized inputs)")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed for Rosetta (default: 42)")
     args = parser.parse_args()
 
     pdb_path = get_pdb_path(args)
@@ -111,7 +266,8 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
     run_mcsce(pdb_path, args.outdir, args.nconfs, args.temperature,
-              failed_log=args.failed_log)
+              failed_log=args.failed_log, minimize=not args.no_minimize,
+              preprocess=args.preprocess, seed=args.seed)
 
 
 if __name__ == "__main__":

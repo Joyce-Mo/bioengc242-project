@@ -7,12 +7,11 @@
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_03252026$JOB_ID.out
-#$ -e logs/mcsce_03252026$JOB_ID.err
+#$ -o logs/mcsce_03272026_$JOB_ID.out
+#$ -e logs/mcsce_03272026_$JOB_ID.err
 #$ -r y
 #$ -m n
 #$ -M joyce.mo@ucsf.edu
-#
 
 source activate mcsce
 
@@ -26,4 +25,5 @@ python scripts/run_mcsce.py \
     --task_id "$SGE_TASK_ID" \
     --outdir "$OUTDIR" \
     --nconfs "$NCONFS" \
-    --failed_log "$FAILED_LOG"
+    --failed_log "$FAILED_LOG" \
+    --preprocess

@@ -66,6 +66,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     pyrosetta.init(
         "-ignore_unrecognized_res -mute all "
         "-ignore_zero_occupancy false "
+        "-corrections:beta_nov16 "
         f"-run:constant_seed -run:jran {seed}",
         set_logging_handler=None,
     )
