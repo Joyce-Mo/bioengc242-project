@@ -137,38 +137,28 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     set_boolean_option("packing:flip_HNQ", False)
 
     # Backrub MC sampling
-    # Smith & Kortemme (2010): 75% backbone / 25% sidechain moves,
-    # Dunbrack rotamers, 10% uniform chi sampling, retain lowest-scoring.
+    # Smith & Kortemme (2008): backbone backrub moves, retain lowest-scoring.
     from pyrosetta.rosetta.protocols.backrub import BackrubMover
-    from pyrosetta.rosetta.protocols.simple_moves.sidechain_moves import JumpRotamerSidechainMover
-    from pyrosetta.rosetta.protocols.moves import RandomMover, MonteCarlo
+    from pyrosetta.rosetta.protocols.moves import MonteCarlo
 
     backrub_mover = BackrubMover()
     backrub_mover.set_max_angle_disp_4(max_angle)
     backrub_mover.set_max_angle_disp_7(max_angle)
 
-    sidechain_mover = JumpRotamerSidechainMover()
-    sidechain_mover.set_task_factory(tf)
-
-    random_mover = RandomMover()
-    random_mover.add_mover(backrub_mover, 0.75)
-    random_mover.add_mover(sidechain_mover, 0.25)
-
     output_paths = []
     for conf_idx in range(n_conformers):
         work_pose = pose.clone()
 
-        # Set up backrub segments and sidechain mover on the work pose
+        # Set up backrub segments on the work pose
         backrub_mover.clear_segments()
         backrub_mover.add_mainchain_segments(work_pose)
-        sidechain_mover.init_task(work_pose)
 
         mc = MonteCarlo(work_pose, scorefxn, kT)
 
         # Track energy trajectory during MC sampling
         trajectory = []
         for step in range(n_mc_steps):
-            random_mover.apply(work_pose)
+            backrub_mover.apply(work_pose)
             accepted = mc.boltzmann(work_pose)
             if step % trajectory_stride == 0:
                 trajectory.append({
