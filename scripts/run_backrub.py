@@ -66,7 +66,6 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     pyrosetta.init(
         "-ignore_unrecognized_res -mute all "
         "-ignore_zero_occupancy false "
-        "-flip_HNQ "
         f"-run:constant_seed -run:jran {seed}",
         set_logging_handler=None,
     )
@@ -75,23 +74,27 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     out_sub = os.path.join(outdir, stem)
     os.makedirs(out_sub, exist_ok=True)
 
-    logger.info(f"Running Backrub on {stem} ({n_conformers} conformers, "
+    logger.info(f"Running PyRosetta on {stem} ({n_conformers} conformers, "
                 f"{n_mc_steps} MC steps, kT={kT})")
 
     pose = pyrosetta.pose_from_pdb(pdb_path)
-    scorefxn = ScoreFunctionFactory.create_score_function("ref2015")
+    scorefxn = ScoreFunctionFactory.create_score_function("beta_nov16")
 
     initial_score = scorefxn(pose)
     logger.info(f"  Initial score: {initial_score:.1f}")
 
-    print("Repack side chains before minimization and backrub sampling")
-
-    # repack all side chains before minimization  
     from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
     from pyrosetta.rosetta.core.pack.task import TaskFactory
     from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
+    from pyrosetta.rosetta.protocols.idealize import IdealizeMover
+    from pyrosetta.rosetta.basic.options import set_boolean_option
 
-    # flip_HNQ is set via -flip_HNQ flag in pyrosetta.init()
+    # Idealize bond geometries before repacking
+    idealize = IdealizeMover()
+    idealize.apply(pose)
+    logger.info(f"Post-idealize score: {scorefxn(pose):.1f}")
+
+    # Repack side chains before minimization and backrub sampling
     tf = TaskFactory()
     tf.push_back(RestrictToRepacking())
     tf.push_back(IncludeCurrent())
@@ -100,6 +103,9 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     packer.task_factory(tf)
     packer.apply(pose)
     logger.info(f"Post-repack score: {scorefxn(pose):.1f}")
+
+    # Enable flip_HNQ for minimization (Dru suggestion)
+    set_boolean_option("packing:flip_HNQ", True)
 
     print("begin minimization")
     # Step 1: Minimize side chains only
@@ -112,7 +118,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_chi.min_type("lbfgs_armijo_nonmonotone")
     min_chi.tolerance(0.01)
     min_chi.apply(pose)
-    logger.info(f"  Post-minimize (chi only): {scorefxn(pose):.1f}")
+    logger.info(f"Post-minimize (chi only): {scorefxn(pose):.1f}")
 
     # Stage 2: Minimize side chains + backbone
     mm_all = MoveMap()
@@ -126,7 +132,10 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_all.apply(pose)
     logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
 
-    # Backrub MC sampling 
+    # Disable flip_HNQ for backrub sampling and remainder
+    set_boolean_option("packing:flip_HNQ", False)
+
+    # Backrub MC sampling
     # Smith & Kortemme (2010): 75% backbone / 25% sidechain moves,
     # Dunbrack rotamers, 10% uniform chi sampling, retain lowest-scoring.
     from pyrosetta.rosetta.protocols.backrub import BackrubMover
