@@ -7,8 +7,8 @@
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_03272026_$JOB_ID.out
-#$ -e logs/mcsce_03272026_$JOB_ID.err
+#$ -o logs/mcsce_03302026_$JOB_ID.out
+#$ -e logs/mcsce_03302026_$JOB_ID.err
 #$ -r y
 #$ -m n
 #$ -M joyce.mo@ucsf.edu
