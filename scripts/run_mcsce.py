@@ -148,6 +148,7 @@ def normalize_pdb_for_amber(pdb_path):
 
     RESNAME_MAP = {
         'HIS_D': 'HID', 'HSD': 'HID', 'HSE': 'HIE', 'HSP': 'HIP',
+        'HIS': 'HID',
         'CYX': 'CYS', 'CYD': 'CYS', 'MSE': 'MET',
     }
 
@@ -193,6 +194,38 @@ def normalize_pdb_for_amber(pdb_path):
     return out_path
 
 
+# Standard amino acids recognized by AMBER ff14SB (and their N/C terminal variants)
+AMBER_STANDARD_RESIDUES = {
+    'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'CYX', 'GLN', 'GLU', 'GLY',
+    'HID', 'HIE', 'HIP', 'HYP', 'ILE', 'LEU', 'LYS', 'MET', 'PHE',
+    'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
+}
+
+
+def validate_pdb_for_mcsce(pdb_path):
+    """Check that all residues in a PDB are standard AMBER residues.
+
+    Returns (is_valid, list_of_bad_residues) where bad_residues contains
+    tuples of (resname, resnum, chain_id) for non-standard residues.
+    """
+    bad_residues = []
+    seen = set()
+    with open(pdb_path) as f:
+        for line in f:
+            if not line.startswith(('ATOM', 'HETATM')):
+                continue
+            resname = line[17:20].strip()
+            resnum = line[22:26].strip()
+            chain = line[21]
+            key = (resname, resnum, chain)
+            if key in seen:
+                continue
+            seen.add(key)
+            if resname not in AMBER_STANDARD_RESIDUES:
+                bad_residues.append(key)
+    return len(bad_residues) == 0, bad_residues
+
+
 def _cleanup_temp_files(pdb_path, preprocess):
     """Remove _amber.pdb and _preproc.pdb temp files."""
     if pdb_path.endswith("_amber.pdb"):
@@ -220,6 +253,17 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     # Normalize Rosetta atom/residue names to AMBER conventions for MCSCE
     pdb_path = normalize_pdb_for_amber(pdb_path)
 
+    # Pre-filter: skip PDBs with non-standard residues
+    is_valid, bad_residues = validate_pdb_for_mcsce(pdb_path)
+    if not is_valid:
+        bad_str = ", ".join(f"{r[0]}:{r[2]}{r[1]}" for r in bad_residues)
+        logger.error(f"SKIPPED {Path(pdb_path).stem}: non-standard residues: {bad_str}")
+        if failed_log:
+            with open(failed_log, "a") as fh:
+                fh.write(f"{original_pdb_path}\tNON_STANDARD_RESIDUES\t{bad_str}\n")
+        _cleanup_temp_files(pdb_path, preprocess)
+        return []
+
     from functools import partial
     from mcsce.libs.libstructure import Structure
     from mcsce.core.side_chain_builder import initialize_func_calc, create_side_chain_ensemble
@@ -234,9 +278,13 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
 
     logger.info(f"Running MC-SCE on {out_stem} ({n_conformers} conformers, T={temperature}K)")
 
+    # Log residue sequence for debugging
+    structure = Structure(Path(pdb_path))
+    structure.build()
+    res_types = list(structure.residue_types)
+    logger.info(f"  Residue sequence ({len(res_types)} res): {' '.join(res_types)}")
+
     try:
-        structure = Structure(Path(pdb_path))
-        structure.build()
         structure = structure.remove_side_chains()
 
         # Initialize energy calculators (required before ensemble generation)
@@ -256,16 +304,27 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         )
     except (IndexError, ValueError, RuntimeError, KeyError) as e:
         logger.error(f"MC-SCE failed on {out_stem}: {type(e).__name__}: {e}")
+        logger.error(f"  Residue sequence was: {' '.join(res_types)}")
+        logger.error(f"  N-terminal residue: {res_types[0] if res_types else 'EMPTY'}")
         if failed_log:
             with open(failed_log, "a") as fh:
-                fh.write(f"{original_pdb_path}\n")
+                fh.write(f"{original_pdb_path}\t{type(e).__name__}\t{e}\n")
         _cleanup_temp_files(pdb_path, preprocess)
         return []
 
     _cleanup_temp_files(pdb_path, preprocess)
 
     outputs = sorted(Path(out_sub).glob("*.pdb"))
-    logger.info(f"Generated {len(outputs)} conformers -> {out_sub}")
+    if len(outputs) == 0:
+        logger.warning(
+            f"Generated 0 conformers for {out_stem} — all {n_conformers} trials "
+            f"had unresolvable clashes (all rotamer energies were inf)"
+        )
+        if failed_log:
+            with open(failed_log, "a") as fh:
+                fh.write(f"{original_pdb_path}\tZERO_CONFORMERS\tall trials clashed\n")
+    else:
+        logger.info(f"Generated {len(outputs)} conformers -> {out_sub}")
 
     if not minimize or len(outputs) == 0:
         return [str(p) for p in outputs]
