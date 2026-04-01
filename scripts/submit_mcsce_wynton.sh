@@ -7,17 +7,17 @@
 #$ -l h_rt=15:00:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_03302026_$JOB_ID.out
-#$ -e logs/mcsce_03302026_$JOB_ID.err
+#$ -o logs/mcsce_04012026_$JOB_ID.out
+#$ -e logs/mcsce_04012026_$JOB_ID.err
 #$ -r y
 #$ -m n
-#$ -M joyce.mo@ucsf.edu
+#$ -M jqmo@berkeley.edu
 
 source activate mcsce
 
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
-NCONFS=5
+NCONFS=10
 FAILED_LOG="logs/mcsce_failed_pdbs.txt"
 
 python scripts/run_mcsce.py \
@@ -27,3 +27,4 @@ python scripts/run_mcsce.py \
     --nconfs "$NCONFS" \
     --failed_log "$FAILED_LOG" \
     --preprocess
+

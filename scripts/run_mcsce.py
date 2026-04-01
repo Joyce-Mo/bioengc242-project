@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 """Run MC-SCE ensemble generation on a batch of PDB files.
 
-Interfaces with the MCSCE package (github.com/THGLab/MCSCE).
-Designed for use with HPC job arrays — each job processes one PDB.
+Interfaces with MCSCE cloned form teresa's lab (github.com/THGLab/MCSCE).
+Designed for use with HPC job arrays. Each job processes one PDB. 
 
 Usage:
-    # Single PDB
-    python run_mcsce.py --pdb input.pdb --outdir ensembles/mcsce --nconfs 5
+python run_mcsce.py --pdb input.pdb --outdir ensembles/mcsce --nconfs 5
 
-    # Job array mode: process the PDB at line $TASK_ID in the file list
-    python run_mcsce.py --pdb_list pdb_list.txt --task_id $SGE_TASK_ID \
-                        --outdir ensembles/mcsce --nconfs 5
+Make sure to run from mcsce env! 
 """
 
 import argparse
@@ -44,47 +41,55 @@ def get_pdb_path(args):
     sys.exit(1)
 
 
-def preprocess_structure(pdb_path, seed=42):
+def minimize_structure(pdb_path, seed=42):
     """Idealize, repack, and 2-step minimize a structure with HNQ flipping.
 
-    Matches the preprocessing in run_backrub.py:
+    Matches the preprocessing protocol from run_backrub.py (Smith & Kortemme, 2010):
       1. Idealize bond geometries
-      2. Repack all side chains
-      3. Enable flip_HNQ
-      4. Minimize chi only
-      5. Minimize chi + backbone
-      6. Disable flip_HNQ
+      2. Repack side chains (MC simulated annealing)
+      3. Minimize chi only (lbfgs, tol=0.01)
+      4. Minimize chi + backbone (lbfgs, tol=0.01)
 
     Returns the path to the preprocessed PDB (written next to the input).
     """
+
+    # note the following 50 or so lines with rosetta are just copied and pasted from run_backrub
+    # TODO: for better code reuse, could turns the rosetta minimization in a separate function and call
+    # but i am feelign lazy rn and will just copy and paste.
     import pyrosetta
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
-    from pyrosetta.rosetta.protocols.minimization_packing import MinMover, PackRotamersMover
+    from pyrosetta.rosetta.protocols.minimization_packing import (
+        MinMover, PackRotamersMover,
+    )
     from pyrosetta.rosetta.core.kinematics import MoveMap
     from pyrosetta.rosetta.core.pack.task import TaskFactory
     from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
     from pyrosetta.rosetta.protocols.idealize import IdealizeMover
     from pyrosetta.rosetta.basic.options import set_boolean_option
 
-    pyrosetta.init(
-        "-ignore_unrecognized_res -mute all "
-        "-ignore_zero_occupancy false "
-        "-corrections:beta_nov16 "
-        f"-run:constant_seed -run:jran {seed}",
-        set_logging_handler=None,
-    )
+    # Only init PyRosetta if not already initialized (e.g. by a prior step)
+    if not pyrosetta.rosetta.basic.was_init_called():
+        pyrosetta.init(
+            "-ignore_unrecognized_res -mute all "
+            "-ignore_zero_occupancy false "
+            "-corrections:beta_nov16 "
+            f"-run:constant_seed -run:jran {seed}",
+            set_logging_handler=None,
+        )
 
     stem = Path(pdb_path).stem
     pose = pyrosetta.pose_from_pdb(pdb_path)
     scorefxn = ScoreFunctionFactory.create_score_function("beta_nov16")
 
-    logger.info(f"Preprocessing {stem}: initial score {scorefxn(pose):.1f}")
+    initial_score = scorefxn(pose)
+    logger.info(f"  Initial score: {initial_score:.1f}")
 
-    # 1. Idealize bond geometries
-    IdealizeMover().apply(pose)
-    logger.info(f"  Post-idealize: {scorefxn(pose):.1f}")
+    # Idealize bond geometries before repacking
+    idealize = IdealizeMover()
+    idealize.apply(pose)
+    logger.info(f"  Post-idealize score: {scorefxn(pose):.1f}")
 
-    # 2. Repack side chains
+    # Repack side chains before minimization and backrub sampling
     tf = TaskFactory()
     tf.push_back(RestrictToRepacking())
     tf.push_back(IncludeCurrent())
@@ -92,12 +97,12 @@ def preprocess_structure(pdb_path, seed=42):
     packer.score_function(scorefxn)
     packer.task_factory(tf)
     packer.apply(pose)
-    logger.info(f"  Post-repack: {scorefxn(pose):.1f}")
+    logger.info(f"  Post-repack score: {scorefxn(pose):.1f}")
 
-    # 3. Enable flip_HNQ for minimization
+    # Enable flip_HNQ for minimization (Dru suggestion)
     set_boolean_option("packing:flip_HNQ", True)
 
-    # 4. Minimize side chains only
+    # Step 1: Minimize side chains only
     mm_chi = MoveMap()
     mm_chi.set_bb(False)
     mm_chi.set_chi(True)
@@ -109,7 +114,7 @@ def preprocess_structure(pdb_path, seed=42):
     min_chi.apply(pose)
     logger.info(f"  Post-minimize (chi only): {scorefxn(pose):.1f}")
 
-    # 5. Minimize side chains + backbone
+    # Stage 2: Minimize side chains + backbone
     mm_all = MoveMap()
     mm_all.set_bb(True)
     mm_all.set_chi(True)
@@ -121,13 +126,57 @@ def preprocess_structure(pdb_path, seed=42):
     min_all.apply(pose)
     logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
 
-    # 6. Disable flip_HNQ
+    # Disable flip_HNQ for backrub sampling and remainder
     set_boolean_option("packing:flip_HNQ", False)
 
     # Write preprocessed PDB next to original
     out_path = str(Path(pdb_path).parent / f"{stem}_preproc.pdb")
     pose.dump_pdb(out_path)
     logger.info(f"  Preprocessed structure -> {out_path}")
+    return out_path
+
+def remove_sidechain(pdb_path):
+    """Remove side chain atoms from a PDB, retaining backbone + CB per MC-SCE paper.
+
+    Per the MC-SCE method (Bhatt & Bhatt):
+      "all the side chain atoms, except the Cβ atom, and any existing water
+       molecules are eliminated."
+
+    Retained atoms: N, CA, C, O, CB, OXT (terminal oxygen).
+    GLY has no CB — only backbone atoms are kept.
+    Water molecules (HOH, WAT, TIP3, SOL) are removed.
+
+    Operates on fixed-width PDB columns:
+      - Atom name:    cols 12-16
+      - Residue name: cols 17-20
+    """
+    # Backbone atoms to keep (CB retained per MC-SCE paper)
+    BACKBONE_ATOMS = {'N', 'CA', 'C', 'O', 'CB', 'OXT'}
+    # Water residue names across common conventions
+    WATER_RESNAMES = {'HOH', 'WAT', 'TIP3', 'SOL', 'TIP'}
+
+    with open(pdb_path) as f:
+        lines = f.readlines()
+
+    out_lines = []
+    for line in lines:
+        if line.startswith(('ATOM', 'HETATM')):
+            resname = line[17:20].strip()
+            # Remove water molecules
+            if resname in WATER_RESNAMES:
+                continue
+            atom_name = line[12:16].strip()
+            # Keep backbone atoms + CB only
+            if atom_name in BACKBONE_ATOMS:
+                out_lines.append(line)
+        else:
+            out_lines.append(line)
+
+    out_path = str(Path(pdb_path).parent / f"{Path(pdb_path).stem}_bb.pdb")
+    with open(out_path, 'w') as f:
+        f.writelines(out_lines)
+
+    logger.info(f"  Removed side chains (kept CB) -> {out_path}")
     return out_path
 
 
@@ -194,6 +243,49 @@ def normalize_pdb_for_amber(pdb_path):
     return out_path
 
 
+def normalize_pdb_for_rosetta(pdb_path):
+    """Rename atoms and residues from AMBER/MCSCE conventions back to Rosetta conventions.
+
+    Reverses the AMBER normalization so that Rosetta can read MCSCE output PDBs.
+
+    Operates on fixed-width PDB columns:
+      - Atom name:    cols 12-16
+      - Residue name: cols 17-20
+
+    AMBER → Rosetta mappings applied:
+      Residue names: HID→HIS_D, HIE→HIS, HIP→HIS (Rosetta auto-detects protonation)
+    """
+    with open(pdb_path) as f:
+        lines = f.readlines()
+
+    # AMBER → Rosetta residue name mapping
+    RESNAME_MAP = {
+        'HID': 'HIS', 'HIE': 'HIS', 'HIP': 'HIS',
+    }
+
+    out_lines = []
+    for line in lines:
+        if not line.startswith(('ATOM', 'HETATM')):
+            out_lines.append(line)
+            continue
+
+        resname = line[17:20].strip()
+
+        # Residue name normalization back to Rosetta conventions
+        if resname in RESNAME_MAP:
+            new_resname = RESNAME_MAP[resname]
+            line = line[:17] + f"{new_resname:>3}" + line[20:]
+
+        out_lines.append(line)
+
+    out_path = str(Path(pdb_path).parent / f"{Path(pdb_path).stem}_rosetta.pdb")
+    with open(out_path, 'w') as f:
+        f.writelines(out_lines)
+
+    logger.info(f"  Normalized AMBER -> Rosetta names -> {out_path}")
+    return out_path
+
+
 # Standard amino acids recognized by AMBER ff14SB (and their N/C terminal variants)
 AMBER_STANDARD_RESIDUES = {
     'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'CYX', 'GLN', 'GLU', 'GLY',
@@ -238,7 +330,7 @@ def _cleanup_temp_files(pdb_path, preprocess):
 
 def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
               minimize=True, preprocess=False, seed=42):
-    """Run MCSCE on a single PDB file.
+    """Run MCSCE on a single PDB file. Based on the wrapper mcsce_sidechain.py from the MCSCE repo.
 
     Args:
         preprocess: If True, run idealize + repack + 2-step minimize with
@@ -247,8 +339,13 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
             generated conformer.
     """
     original_pdb_path = pdb_path
+
+    # Step 1-2: Repack + minimize (idealize, repack, 2-stage min w/ HNQ flipping)
     if preprocess:
-        pdb_path = preprocess_structure(pdb_path, seed=seed)
+        pdb_path = minimize_structure(pdb_path, seed=seed)
+
+    # Step 3: Remove side chains (keep backbone + CB per MC-SCE paper)
+    pdb_path = remove_sidechain(pdb_path)
 
     # Normalize Rosetta atom/residue names to AMBER conventions for MCSCE
     pdb_path = normalize_pdb_for_amber(pdb_path)
@@ -271,20 +368,23 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     from mcsce.libs.libenergy import prepare_energy_function
 
     stem = Path(pdb_path).stem
-    # Strip _preproc suffix for output dir naming
-    out_stem = stem.replace("_preproc", "")
+    # Strip intermediate suffixes for output dir naming
+    out_stem = stem.replace("_preproc", "").replace("_bb", "").replace("_amber", "")
     out_sub = os.path.join(outdir, out_stem)
     os.makedirs(out_sub, exist_ok=True)
 
     logger.info(f"Running MC-SCE on {out_stem} ({n_conformers} conformers, T={temperature}K)")
 
-    # Log residue sequence for debugging
+    # Step 4: MC-SCE side chain ensemble generation
+    # Load the backbone-only structure for MCSCE
     structure = Structure(Path(pdb_path))
     structure.build()
     res_types = list(structure.residue_types)
     logger.info(f"  Residue sequence ({len(res_types)} res): {' '.join(res_types)}")
 
     try:
+        # MCSCE rebuilds side chains onto the bare backbone using augmented
+        # Rosenbluth chain growth with backbone-dependent rotamer library
         structure = structure.remove_side_chains()
 
         # Initialize energy calculators (required before ensemble generation)
@@ -329,7 +429,8 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     if not minimize or len(outputs) == 0:
         return [str(p) for p in outputs]
 
-    # Rosetta cartesian energy minimization on each conformer
+    # Step 5: Rosetta cartesian coordinate minimization on each conformer
+    # Normalize AMBER/MCSCE naming back to Rosetta conventions first
     import pyrosetta
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
     from pyrosetta.rosetta.protocols.minimization_packing import MinMover
@@ -361,17 +462,23 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
 
     minimized_paths = []
     for pdb_out in outputs:
-        pose = pyrosetta.pose_from_pdb(str(pdb_out))
+        # Convert AMBER naming -> Rosetta naming for cartesian minimization
+        rosetta_pdb = normalize_pdb_for_rosetta(str(pdb_out))
+        pose = pyrosetta.pose_from_pdb(rosetta_pdb)
         score_before = scorefxn_cart(pose)
         min_mover.apply(pose)
         score_after = scorefxn_cart(pose)
-        pose.dump_pdb(str(pdb_out))  # overwrite with minimized structure
+        # Overwrite original MCSCE output with minimized Rosetta-named structure
+        pose.dump_pdb(str(pdb_out))
         logger.info(f"  Minimized {pdb_out.name}: {score_before:.1f} -> {score_after:.1f}")
         minimized_paths.append(str(pdb_out))
+        # Clean up temporary rosetta-named PDB
+        if os.path.exists(rosetta_pdb):
+            os.remove(rosetta_pdb)
 
     return minimized_paths
 
-
+# main functions for parsing args from shell script or command line 
 def main():
     parser = argparse.ArgumentParser(description="MC-SCE ensemble generation")
     parser.add_argument("--pdb", type=str, help="Single PDB file path")
