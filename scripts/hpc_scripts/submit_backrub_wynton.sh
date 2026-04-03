@@ -4,17 +4,17 @@
 #$ -cwd
 #$ -t 1-100000
 #$ -tc 200
-#$ -l h_rt=10:00:00
+#$ -l h_rt=12:00:00
 #$ -l mem_free=8G
-#$ -o logs/backrub_03272026_$JOB_ID.out
-#$ -e logs/backrub_03272026_$JOB_ID.err
+#$ -o logs/backrub_04032026_$JOB_ID.out
+#$ -e logs/backrub_04032026_$JOB_ID.err
 
 source activate mcsce
 
 PDB_LIST="pdb_list.txt"
-OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all"
-SUBSET_DIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles"
-NCONFS=3
+OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2"
+SUBSET_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_1"
+NCONFS=5
 NSTEPS=10000
 KT=0.6
 
@@ -28,7 +28,7 @@ if [ -d "${SUBSET_DIR}/${PDB_STEM}" ] && [ "$(ls -A "${SUBSET_DIR}/${PDB_STEM}"/
     exit 0
 fi
 
-python scripts/run_backrub.py \
+python scripts/data_preparation/run_backrub.py \
     --pdb_list "$PDB_LIST" \
     --task_id "$SGE_TASK_ID" \
     --outdir "$OUTDIR" \

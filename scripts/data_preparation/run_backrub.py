@@ -8,9 +8,6 @@ Usage:
     # Single PDB
     python run_backrub.py --pdb input.pdb --outdir ensembles/backrub --nconfs 5
 
-    # Job array mode
-    python run_backrub.py --pdb_list pdb_list.txt --task_id $SLURM_ARRAY_TASK_ID \
-                          --outdir ensembles/backrub --nconfs 5
 """
 
 import argparse
@@ -47,16 +44,24 @@ def get_pdb_path(args):
 
 def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
                 repack=False, trajectory_stride=100):
-    """Run Backrub on a single PDB following Smith & Kortemme (2008).
+    """Run Backrub on a single PDB following Smith & Kortemme (2010) paper's methods
 
-    Protocol:
-      1. (Optional) Repack all side chains via MC simulated annealing
+    
+    Overview of Protocol from Smith & Kortemme (2010) paper:
+      1. Repack all side chains via MC simulated annealing
       2. Two-stage minimization: (a) side chains only, (b) side chains + backbone
       3. Backrub MC with 75% backbone / 25% sidechain moves, Dunbrack rotamers,
          10% uniform chi sampling. Retains lowest-scoring structure per trajectory.
       4. Post-backrub two-stage minimization on each conformer
+     
+       Although note that I did update protocol for...
+    - newer score function
+    - minimization of side chain, separately, followed by side chain + bacbone (instead of 
+    some random backbone residues near mutations of the PDZ that Kortemme paper was looking at)
+    - idealization of bond geometries during repacking step
+    - explicitly flip_HNQ during minimization but not during backrub sampling 
 
-    Energy trajectories are saved to <outdir>/<stem>/trajectory_*.csv
+
     """
     import pyrosetta
     from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
@@ -137,7 +142,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     set_boolean_option("packing:flip_HNQ", False)
 
     # Backrub MC sampling
-    # Smith & Kortemme (2008): backbone backrub moves, retain lowest-scoring.
+    # Smith & Kortemme (2010): backbone backrub moves, retain lowest-scoring.
     from pyrosetta.rosetta.protocols.backrub import BackrubMover
     from pyrosetta.rosetta.protocols.moves import MonteCarlo
 
