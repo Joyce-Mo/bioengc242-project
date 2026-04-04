@@ -22,6 +22,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Force unbuffered output — ensures HPC logs are written before crashes
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buffering=1)
+
 
 def get_pdb_path(args):
     """Resolve the PDB path from either --pdb or --pdb_list + --task_id."""
@@ -194,8 +198,10 @@ def normalize_pdb_for_amber(pdb_path):
 
     Rosetta → AMBER mappings applied:
       Residue names: HIS_D→HID, HSE→HIE, HSP→HIP, HSD→HID, CYX→CYS, MSE→MET
-      Atom names:    H1→H at N-terminal (non-PRO); remove H1 for N-terminal PRO;
-                     SE→SD for MSE→MET
+      Atom names:    SE→SD for MSE→MET
+
+    Note: N-terminal H1/H2/H3 atoms are NOT renamed — MCSCE's internal code
+    (get_all_backbone_atom_coords) expects exactly H1, H2, H3 at the N-terminal.
     """
     with open(pdb_path) as f:
         lines = f.readlines()
@@ -207,7 +213,6 @@ def normalize_pdb_for_amber(pdb_path):
     }
 
     out_lines = []
-    first_resnum = None
     for line in lines:
         if not line.startswith(('ATOM', 'HETATM')):
             out_lines.append(line)
@@ -215,11 +220,6 @@ def normalize_pdb_for_amber(pdb_path):
 
         atom_name = line[12:16]
         resname = line[17:20].strip()
-        resnum = line[22:26].strip()
-
-        # Track first residue number (N-terminal)
-        if first_resnum is None:
-            first_resnum = resnum
 
         # Residue name normalization
         if resname in RESNAME_MAP:
@@ -229,14 +229,6 @@ def normalize_pdb_for_amber(pdb_path):
                 atom_name = ' SD '
             line = line[:17] + f"{new_resname:>3}" + line[20:]
             line = line[:12] + atom_name + line[16:]
-
-        # N-terminal atom naming
-        if resnum == first_resnum and atom_name.strip() == 'H1':
-            if resname == 'PRO' or RESNAME_MAP.get(resname) == 'PRO':
-                continue  # PRO N-term has no H1 in AMBER
-            else:
-                atom_name = ' H  '
-                line = line[:12] + atom_name + line[16:]
 
         out_lines.append(line)
 
@@ -422,10 +414,12 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     pdb_path = renumber_residues(pdb_path)
     temp_files.append(pdb_path)
 
+    import numpy as np
     from functools import partial
     from mcsce.libs.libstructure import Structure
     from mcsce.core.side_chain_builder import initialize_func_calc, create_side_chain_ensemble
     from mcsce.core.build_definitions import forcefields
+    from mcsce.core.definitions import aa3to1
     from mcsce.libs.libenergy import prepare_energy_function
 
     stem = Path(pdb_path).stem
@@ -437,27 +431,107 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     logger.info(f"Running MC-SCE on {out_stem} ({n_conformers} conformers, T={temperature}K)")
 
     # Step 4: MC-SCE side chain ensemble generation
-    # Load the backbone-only structure for MCSCE
-    structure = Structure(Path(pdb_path))
-    structure.build()
-    res_types = list(structure.residue_types)
+    # Build Structure from FASTA rather than loading from PDB directly.
+    # This matches the working mcsce_sidechain.py wrapper and avoids:
+    #   - KeyError from terminal residue/atom mismatches with forcefield
+    #     (PDB uses HID but forcefield expects HIP for terminal histidines)
+    #   - IndexError from residue_types returning list instead of numpy array
+    #   - Atom naming inconsistencies between Rosetta/AMBER/MCSCE conventions
+    #
+    # The FASTA builder creates internally consistent atom arrays that are
+    # guaranteed to match the forcefield definitions.
+
+    # First load PDB to extract sequence and backbone coords
+    pdb_structure = Structure(Path(pdb_path))
+    pdb_structure.build()
+    res_types = list(pdb_structure.residue_types)
     logger.info(f"  Residue sequence ({len(res_types)} res): {' '.join(res_types)}")
 
+    # Build coord lookup from PDB: (resnum, atom_name) -> [x, y, z]
+    pdb_atoms = pdb_structure.data_array
+    from mcsce.libs.libstructure import col_resSeq, col_name, col_x, col_y, col_z
+    coord_lookup = {}
+    for row in pdb_atoms:
+        key = (int(row[col_resSeq]), row[col_name])
+        coord_lookup[key] = np.array([float(row[col_x]), float(row[col_y]), float(row[col_z])])
+
+    # Convert 3-letter residue codes to 1-letter FASTA.
+    # All histidine variants (HID, HIE, HIP) must map to 'H' so that
+    # parse_fasta_to_array → translate_seq_to_3l converts them to 'HIP',
+    # which is what the forcefield expects at terminal positions (NHIP, CHIP).
+    # aa3to1 maps HID→'d', HIE→'e', HIP→'p' (lowercase), but translate_seq_to_3l
+    # only handles 'H'→'HIP'. Using lowercase would keep HID/HIE and cause
+    # KeyError when the forcefield looks up NHID or CHID.
+    HIS_VARIANTS = {'HID', 'HIE', 'HIP', 'HIS'}
+    fasta = ""
+    for res in res_types:
+        if res in HIS_VARIANTS:
+            fasta += 'H'
+        else:
+            code = aa3to1.get(res, None)
+            if code is None:
+                logger.error(f"SKIPPED {out_stem}: unknown residue {res} has no 1-letter code")
+                if failed_log:
+                    with open(failed_log, "a") as fh:
+                        fh.write(f"{original_pdb_path}\tUNKNOWN_RESIDUE\t{res}\n")
+                _cleanup_temp_files(temp_files)
+                return []
+            fasta += code
+
+    # Build MCSCE Structure from FASTA (internally consistent naming)
+    structure = Structure(fasta=fasta)
+    structure.build()
+
+    # Map PDB backbone coords onto the FASTA structure's atom order.
+    # FASTA structure atom order per residue:
+    #   N-term non-PRO: N, CA, C, O, H1, H2, H3
+    #   N-term PRO:     N, CA, C, O, H1, H2
+    #   Middle non-PRO: N, CA, C, O, H
+    #   Middle PRO:     N, CA, C, O
+    #   C-term gets +OXT appended
+    n_atoms = len(structure.data_array)
+    coords = np.zeros((n_atoms, 3), dtype=np.float64)
+    # Renumbered PDB residues start at 1, matching FASTA resid = residx + 1
+    for i, row in enumerate(structure.data_array):
+        resnum = int(row[col_resSeq])
+        atom_name = row[col_name]
+        key = (resnum, atom_name)
+        if key in coord_lookup:
+            coords[i] = coord_lookup[key]
+        else:
+            # H atom missing from PDB — approximate from backbone geometry
+            # Place H ~1.0 Å from N along the C(prev)-N direction
+            n_key = (resnum, 'N')
+            ca_key = (resnum, 'CA')
+            if n_key in coord_lookup and ca_key in coord_lookup:
+                n_pos = coord_lookup[n_key]
+                ca_pos = coord_lookup[ca_key]
+                # Place H opposite to CA direction from N
+                direction = n_pos - ca_pos
+                norm = np.linalg.norm(direction)
+                if norm > 0:
+                    coords[i] = n_pos + direction / norm * 1.0
+                else:
+                    coords[i] = n_pos
+            else:
+                coords[i] = [0.0, 0.0, 0.0]
+            logger.debug(f"  Approximated position for {atom_name} at res {resnum}")
+
+    structure.coords = coords
+
     try:
-        # MCSCE rebuilds side chains onto the bare backbone using augmented
-        # Rosenbluth chain growth with backbone-dependent rotamer library
-        structure = structure.remove_side_chains()
+        # No need to call remove_side_chains() — the FASTA-built structure
+        # already contains only backbone atoms (N, CA, C, O, H, terminals).
 
         # Initialize energy calculators (required before ensemble generation)
-        # Pass aa_seq explicitly (as in the working mcsce_sidechain.py wrapper)
-        # to avoid issues with residue_types returning a list instead of array
+        # Use ["lj", "clash"] terms — matches the working mcsce_sidechain.py wrapper
         ff = forcefields["Amberff14SB"]
         ff_obj = ff(Cterminal='OXT', Nterminal='HN')
         initialize_func_calc(
             partial(prepare_energy_function, batch_size=16,
-                    forcefield=ff_obj, terms=["lj", "clash", "coulomb"]),
+                    forcefield=ff_obj, terms=["lj", "clash"]),
             structure=structure,
-            aa_seq=res_types,
+            aa_seq=list(structure.residue_types),
         )
 
         create_side_chain_ensemble(
