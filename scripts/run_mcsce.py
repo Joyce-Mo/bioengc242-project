@@ -142,16 +142,21 @@ def remove_sidechain(pdb_path):
       "all the side chain atoms, except the Cβ atom, and any existing water
        molecules are eliminated."
 
-    Retained atoms: N, CA, C, O, CB, OXT (terminal oxygen).
+    Retained atoms: N, CA, C, O, CB, OXT, and backbone hydrogens (H, H1, H2, H3).
     GLY has no CB — only backbone atoms are kept.
     Water molecules (HOH, WAT, TIP3, SOL) are removed.
+
+    Note: backbone H atoms must be kept for MCSCE's energy calculations
+    (they are part of MCSCE's internal backbone_atoms definition).
 
     Operates on fixed-width PDB columns:
       - Atom name:    cols 12-16
       - Residue name: cols 17-20
     """
-    # Backbone atoms to keep (CB retained per MC-SCE paper)
-    BACKBONE_ATOMS = {'N', 'CA', 'C', 'O', 'CB', 'OXT'}
+    # Backbone atoms to keep — must match MCSCE's backbone_atoms definition
+    # which is ('N', 'C', 'CA', 'O', 'OXT', 'H', 'H1', 'H2', 'H3')
+    # plus CB per MC-SCE paper
+    BACKBONE_ATOMS = {'N', 'CA', 'C', 'O', 'CB', 'OXT', 'H', 'H1', 'H2', 'H3'}
     # Water residue names across common conventions
     WATER_RESNAMES = {'HOH', 'WAT', 'TIP3', 'SOL', 'TIP'}
 
@@ -318,14 +323,59 @@ def validate_pdb_for_mcsce(pdb_path):
     return len(bad_residues) == 0, bad_residues
 
 
-def _cleanup_temp_files(pdb_path, preprocess):
-    """Remove _amber.pdb and _preproc.pdb temp files."""
-    if pdb_path.endswith("_amber.pdb"):
-        preproc_path = pdb_path.replace("_amber.pdb", ".pdb")
-        if os.path.exists(pdb_path):
-            os.remove(pdb_path)
-        if preprocess and preproc_path.endswith("_preproc.pdb") and os.path.exists(preproc_path):
-            os.remove(preproc_path)
+def renumber_residues(pdb_path):
+    """Renumber residues contiguously starting from 1.
+
+    MCSCE assumes contiguous residue numbering (no gaps) when iterating
+    over residues via `idx + structure.res_nums[0]`. CATH domain PDBs
+    often have non-contiguous numbering from the parent chain, which
+    causes IndexError when MCSCE tries to filter for a non-existent
+    residue number.
+
+    Operates on fixed-width PDB columns:
+      - Residue sequence number: cols 22-26 (right-justified)
+    """
+    with open(pdb_path) as f:
+        lines = f.readlines()
+
+    # Build mapping from (chain, old_resnum) -> new_resnum
+    seen = {}
+    counter = 0
+    for line in lines:
+        if not line.startswith(('ATOM', 'HETATM')):
+            continue
+        chain = line[21]
+        old_resnum = line[22:26].strip()
+        key = (chain, old_resnum)
+        if key not in seen:
+            counter += 1
+            seen[key] = counter
+
+    out_lines = []
+    for line in lines:
+        if line.startswith(('ATOM', 'HETATM')):
+            chain = line[21]
+            old_resnum = line[22:26].strip()
+            new_resnum = seen[(chain, old_resnum)]
+            line = line[:22] + f"{new_resnum:>4}" + line[26:]
+        out_lines.append(line)
+
+    out_path = str(Path(pdb_path).parent / f"{Path(pdb_path).stem}_renum.pdb")
+    with open(out_path, 'w') as f:
+        f.writelines(out_lines)
+
+    logger.info(f"  Renumbered {counter} residues contiguously -> {out_path}")
+    return out_path
+
+
+def _cleanup_temp_files(temp_files):
+    """Remove a list of intermediate temp file paths."""
+    for f in temp_files:
+        if f and os.path.exists(f):
+            try:
+                os.remove(f)
+            except OSError:
+                pass
 
 
 def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
@@ -339,16 +389,20 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
             generated conformer.
     """
     original_pdb_path = pdb_path
+    temp_files = []  # track intermediate files for cleanup
 
     # Step 1-2: Repack + minimize (idealize, repack, 2-stage min w/ HNQ flipping)
     if preprocess:
         pdb_path = minimize_structure(pdb_path, seed=seed)
+        temp_files.append(pdb_path)
 
-    # Step 3: Remove side chains (keep backbone + CB per MC-SCE paper)
+    # Step 3: Remove side chains (keep backbone + CB + H atoms per MC-SCE)
     pdb_path = remove_sidechain(pdb_path)
+    temp_files.append(pdb_path)
 
     # Normalize Rosetta atom/residue names to AMBER conventions for MCSCE
     pdb_path = normalize_pdb_for_amber(pdb_path)
+    temp_files.append(pdb_path)
 
     # Pre-filter: skip PDBs with non-standard residues
     is_valid, bad_residues = validate_pdb_for_mcsce(pdb_path)
@@ -358,8 +412,15 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         if failed_log:
             with open(failed_log, "a") as fh:
                 fh.write(f"{original_pdb_path}\tNON_STANDARD_RESIDUES\t{bad_str}\n")
-        _cleanup_temp_files(pdb_path, preprocess)
+        _cleanup_temp_files(temp_files)
         return []
+
+    # Renumber residues contiguously (1, 2, 3, ...) — required because
+    # MCSCE's initialize_func_calc assumes contiguous numbering when it
+    # computes residue indices as idx + res_nums[0]. CATH domain PDBs
+    # often have gaps that cause IndexError.
+    pdb_path = renumber_residues(pdb_path)
+    temp_files.append(pdb_path)
 
     from functools import partial
     from mcsce.libs.libstructure import Structure
@@ -369,7 +430,7 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
 
     stem = Path(pdb_path).stem
     # Strip intermediate suffixes for output dir naming
-    out_stem = stem.replace("_preproc", "").replace("_bb", "").replace("_amber", "")
+    out_stem = stem.replace("_preproc", "").replace("_bb", "").replace("_amber", "").replace("_renum", "")
     out_sub = os.path.join(outdir, out_stem)
     os.makedirs(out_sub, exist_ok=True)
 
@@ -388,12 +449,15 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         structure = structure.remove_side_chains()
 
         # Initialize energy calculators (required before ensemble generation)
+        # Pass aa_seq explicitly (as in the working mcsce_sidechain.py wrapper)
+        # to avoid issues with residue_types returning a list instead of array
         ff = forcefields["Amberff14SB"]
         ff_obj = ff(Cterminal='OXT', Nterminal='HN')
         initialize_func_calc(
             partial(prepare_energy_function, batch_size=16,
                     forcefield=ff_obj, terms=["lj", "clash", "coulomb"]),
             structure=structure,
+            aa_seq=res_types,
         )
 
         create_side_chain_ensemble(
@@ -409,10 +473,10 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         if failed_log:
             with open(failed_log, "a") as fh:
                 fh.write(f"{original_pdb_path}\t{type(e).__name__}\t{e}\n")
-        _cleanup_temp_files(pdb_path, preprocess)
+        _cleanup_temp_files(temp_files)
         return []
 
-    _cleanup_temp_files(pdb_path, preprocess)
+    _cleanup_temp_files(temp_files)
 
     outputs = sorted(Path(out_sub).glob("*.pdb"))
     if len(outputs) == 0:
