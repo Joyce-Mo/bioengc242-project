@@ -1,0 +1,63 @@
+2026-04-04 00:17:33,740 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:17:33,741 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:17:33,778 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:17:33,779 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:17:34,438 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:17:34,439 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:17:34,951 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:17:34,952 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:17:40,191 [INFO]   Initial score: 204.1
+2026-04-04 00:17:40,671 [INFO]   Initial score: 42.5
+2026-04-04 00:17:40,746 [INFO]   Initial score: 616.8
+2026-04-04 00:17:42,337 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:17:42,340 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:17:43,990 [INFO]   Post-idealize score: 76.0
+2026-04-04 00:17:44,771 [INFO]   Post-repack score: -143.1
+2026-04-04 00:17:45,098 [INFO]   Post-minimize (chi only): -188.6
+2026-04-04 00:17:45,370 [INFO]   Initial score: 436.6
+2026-04-04 00:17:46,906 [INFO]   Post-minimize (chi+bb): -292.0
+2026-04-04 00:17:47,003 [INFO]   Preprocessed structure -> /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/3stjA03_13_preproc.pdb
+2026-04-04 00:17:47,068 [INFO]   Removed side chains (kept CB) -> /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/3stjA03_13_preproc_bb.pdb
+2026-04-04 00:17:47,091 [INFO]   Post-idealize score: 474.8
+2026-04-04 00:17:47,122 [INFO]   Normalized atom/residue names -> /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/3stjA03_13_preproc_bb_amber.pdb
+2026-04-04 00:17:47,148 [INFO]   Renumbered 97 residues contiguously -> /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold/3stjA03_13_preproc_bb_amber_renum.pdb
