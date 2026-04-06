@@ -142,7 +142,7 @@ def minimize_structure(pdb_path, seed=42):
 def remove_sidechain(pdb_path):
     """Remove side chain atoms from a PDB, retaining backbone + CB per MC-SCE paper.
 
-    Per the MC-SCE method (Bhatt & Bhatt):
+    Per the MC-SCE method (Bhatt & Head-Gordon):
       "all the side chain atoms, except the Cβ atom, and any existing water
        molecules are eliminated."
 
@@ -150,17 +150,24 @@ def remove_sidechain(pdb_path):
     GLY has no CB — only backbone atoms are kept.
     Water molecules (HOH, WAT, TIP3, SOL) are removed.
 
-    Note: backbone H atoms must be kept for MCSCE's energy calculations
-    (they are part of MCSCE's internal backbone_atoms definition).
+    Rosetta writes N-terminal H atoms as `1H/2H/3H` (digit-prefixed). MCSCE
+    expects AMBER-style `H1/H2/H3`, so we rename them on the way out — without
+    this rename, the script silently drops all 3 N-terminal H atoms and the
+    downstream FASTA-build path falls back to a placeholder geometry that
+    sends rotamer energies to inf, producing 0 conformers.
 
     Operates on fixed-width PDB columns:
       - Atom name:    cols 12-16
       - Residue name: cols 17-20
     """
     # Backbone atoms to keep — must match MCSCE's backbone_atoms definition
-    # which is ('N', 'C', 'CA', 'O', 'OXT', 'H', 'H1', 'H2', 'H3')
-    # plus CB per MC-SCE paper
-    BACKBONE_ATOMS = {'N', 'CA', 'C', 'O', 'CB', 'OXT', 'H', 'H1', 'H2', 'H3'}
+    # which is ('N', 'C', 'CA', 'O', 'OXT', 'H', 'H1', 'H2', 'H3') plus CB per
+    # MC-SCE paper. We also accept Rosetta's `1H/2H/3H` spelling and rename.
+    BACKBONE_ATOMS = {'N', 'CA', 'C', 'O', 'CB', 'OXT', 'H',
+                      'H1', 'H2', 'H3', '1H', '2H', '3H'}
+    # Rosetta -> AMBER N-terminal H atom rename. Values are exact 4-char
+    # atom-name fields (cols 12-16) so we can splice them back into the line.
+    H_RENAME = {'1H': ' H1 ', '2H': ' H2 ', '3H': ' H3 '}
     # Water residue names across common conventions
     WATER_RESNAMES = {'HOH', 'WAT', 'TIP3', 'SOL', 'TIP'}
 
@@ -177,6 +184,8 @@ def remove_sidechain(pdb_path):
             atom_name = line[12:16].strip()
             # Keep backbone atoms + CB only
             if atom_name in BACKBONE_ATOMS:
+                if atom_name in H_RENAME:
+                    line = line[:12] + H_RENAME[atom_name] + line[16:]
                 out_lines.append(line)
         else:
             out_lines.append(line)
@@ -491,6 +500,52 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     #   C-term gets +OXT appended
     n_atoms = len(structure.data_array)
     coords = np.zeros((n_atoms, 3), dtype=np.float64)
+
+    def _approx_amide_h(resnum):
+        """Place amide H ~1.01 Å from N along the bisector of C(prev)→N and CA→N,
+        i.e. opposite the bond bisector — peptide-plane geometry."""
+        n = coord_lookup.get((resnum, 'N'))
+        ca = coord_lookup.get((resnum, 'CA'))
+        c_prev = coord_lookup.get((resnum - 1, 'C'))
+        if n is None or ca is None:
+            return np.zeros(3)
+        if c_prev is None:
+            # Fall back to ~1 Å opposite CA from N (worse but non-degenerate)
+            v = n - ca
+            nv = np.linalg.norm(v)
+            return n + (v / nv) if nv > 0 else n
+        v1 = (n - c_prev); v1 /= max(np.linalg.norm(v1), 1e-8)
+        v2 = (n - ca);     v2 /= max(np.linalg.norm(v2), 1e-8)
+        b = v1 + v2
+        nb = np.linalg.norm(b)
+        return n + (b / nb) * 1.01 if nb > 0 else n
+
+    def _approx_nterm_h(resnum, idx):
+        """Spread up to 3 N-terminal H atoms around N along orthogonal directions
+        so they don't collapse onto a single point. This is a coarse stand-in
+        used only when input PDB lacks N-terminal hydrogens entirely."""
+        n = coord_lookup.get((resnum, 'N'))
+        ca = coord_lookup.get((resnum, 'CA'))
+        if n is None or ca is None:
+            return np.zeros(3)
+        z = ca - n
+        zn = np.linalg.norm(z)
+        if zn == 0:
+            return n + np.array([1.0, 0.0, 0.0])
+        z /= zn
+        # Build an orthonormal frame (z along N→CA, x/y perpendicular)
+        helper = np.array([1.0, 0.0, 0.0]) if abs(z[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
+        x = np.cross(z, helper); x /= np.linalg.norm(x)
+        y = np.cross(z, x)
+        # 3 H positions tilted ~109.5° from N-CA, separated by 120° around z
+        import math
+        tilt = math.radians(109.5)
+        ang = idx * (2 * math.pi / 3)
+        d = math.sin(tilt) * (math.cos(ang) * x + math.sin(ang) * y) - math.cos(tilt) * z
+        return n + d * 1.01
+
+    # Track which N-terminal H index we're on per residue (for the fallback only)
+    nterm_h_counter = {}
     # Renumbered PDB residues start at 1, matching FASTA resid = residx + 1
     for i, row in enumerate(structure.data_array):
         resnum = int(row[col_resSeq])
@@ -498,24 +553,17 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         key = (resnum, atom_name)
         if key in coord_lookup:
             coords[i] = coord_lookup[key]
+            continue
+        # Missing atom — approximate from backbone geometry
+        if atom_name == 'H':
+            coords[i] = _approx_amide_h(resnum)
+        elif atom_name in ('H1', 'H2', 'H3'):
+            idx = nterm_h_counter.get(resnum, 0)
+            nterm_h_counter[resnum] = idx + 1
+            coords[i] = _approx_nterm_h(resnum, idx)
         else:
-            # H atom missing from PDB — approximate from backbone geometry
-            # Place H ~1.0 Å from N along the C(prev)-N direction
-            n_key = (resnum, 'N')
-            ca_key = (resnum, 'CA')
-            if n_key in coord_lookup and ca_key in coord_lookup:
-                n_pos = coord_lookup[n_key]
-                ca_pos = coord_lookup[ca_key]
-                # Place H opposite to CA direction from N
-                direction = n_pos - ca_pos
-                norm = np.linalg.norm(direction)
-                if norm > 0:
-                    coords[i] = n_pos + direction / norm * 1.0
-                else:
-                    coords[i] = n_pos
-            else:
-                coords[i] = [0.0, 0.0, 0.0]
-            logger.debug(f"  Approximated position for {atom_name} at res {resnum}")
+            coords[i] = np.zeros(3)
+        logger.debug(f"  Approximated position for {atom_name} at res {resnum}")
 
     structure.coords = coords
 
