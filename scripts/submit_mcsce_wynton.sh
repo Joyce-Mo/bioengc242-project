@@ -4,20 +4,27 @@
 #$ -cwd
 #$ -t 1-30
 #$ -tc 200
-#$ -l h_rt=15:00:00
+#$ -l h_rt=00:10:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_04072026_$JOB_ID.out
-#$ -e logs/mcsce_04072026_$JOB_ID.err
+#$ -o logs/mcsce_04082026_$JOB_ID.out
+#$ -e logs/mcsce_04082026_$JOB_ID.err
 #$ -r y
 #$ -m n
 #$ -M jqmo@berkeley.edu
 
-source activate mcsce
+# mcsce-precompute backend env: needs openmm, pdbfixer, biopython, tqdm,
+# numpy, AND pyrosetta (for the post-MCSCE cartesian min step).
+source activate mcsce-precompute
+
+# Tell run_mcsce.py where the mcsce-precompute checkout lives on Wynton.
+# run_mcsce.py reads this via os.environ in MCSCE_PRECOMPUTE_DIR (if set);
+# otherwise edit MCSCE_PRECOMPUTE_DIR at the top of run_mcsce.py.
+export MCSCE_PRECOMPUTE_DIR="/wynton/home/rotation/jqmo/rotation3/mcsce-precompute"
 
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
-NCONFS=30
+NCONFS=100
 FAILED_LOG="logs/mcsce_failed_pdbs.txt"
 
 python scripts/run_mcsce.py \
@@ -26,5 +33,6 @@ python scripts/run_mcsce.py \
     --outdir "$OUTDIR" \
     --nconfs "$NCONFS" \
     --failed_log "$FAILED_LOG" \
-    --preprocess
+    --device CPU \
+    --num_workers 1
 
