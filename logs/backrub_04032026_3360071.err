@@ -1,0 +1,710 @@
+2026-04-03 14:37:45,674 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 14:37:45,711 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 14:37:45,777 [INFO] Running PyRosetta on 1gcvA00_31 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 14:38:30,326 [INFO]   Initial score: -116.1
+2026-04-03 14:38:39,191 [INFO] Post-idealize score: -71.9
+2026-04-03 14:38:40,544 [INFO] Post-repack score: -191.4
+2026-04-03 14:38:41,156 [INFO] Post-minimize (chi only): -231.0
+2026-04-03 14:38:44,246 [INFO]   Post-minimize (chi+bb): -336.1
+2026-04-03 14:38:44,347 [INFO]   Conformer 0: 1323 backrub segments
+2026-04-03 14:40:53,073 [INFO]   Conformer 0: MC=-336.1 -> min_chi=-336.1 -> min_all=-336.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1gcvA00_31/1gcvA00_31_backrub_000.pdb
+2026-04-03 14:40:53,430 [INFO]   Conformer 1: 1323 backrub segments
+2026-04-03 14:43:05,604 [INFO]   Conformer 1: MC=-336.1 -> min_chi=-336.1 -> min_all=-336.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1gcvA00_31/1gcvA00_31_backrub_001.pdb
+2026-04-03 14:43:05,642 [INFO]   Conformer 2: 1323 backrub segments
+2026-04-03 14:45:12,561 [INFO]   Conformer 2: MC=-336.1 -> min_chi=-336.1 -> min_all=-336.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1gcvA00_31/1gcvA00_31_backrub_002.pdb
+2026-04-03 14:45:12,583 [INFO]   Conformer 3: 1323 backrub segments
+2026-04-03 14:47:25,670 [INFO]   Conformer 3: MC=-336.1 -> min_chi=-336.1 -> min_all=-336.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1gcvA00_31/1gcvA00_31_backrub_003.pdb
+2026-04-03 14:47:25,697 [INFO]   Conformer 4: 1323 backrub segments
+2026-04-03 14:49:32,464 [INFO]   Conformer 4: MC=-336.1 -> min_chi=-336.1 -> min_all=-336.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1gcvA00_31/1gcvA00_31_backrub_004.pdb
+2026-04-03 15:56:31,495 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 15:56:31,510 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 15:56:31,556 [INFO] Running PyRosetta on 1kj6A00_4 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 15:56:55,921 [INFO]   Initial score: 295.7
+2026-04-03 15:56:56,863 [INFO] Post-idealize score: 438.3
+2026-04-03 15:56:57,055 [INFO] Post-repack score: 322.4
+2026-04-03 15:56:57,126 [INFO] Post-minimize (chi only): 302.6
+2026-04-03 15:56:57,927 [INFO]   Post-minimize (chi+bb): -25.6
+2026-04-03 15:56:58,007 [INFO]   Conformer 0: 384 backrub segments
+2026-04-03 15:57:24,098 [INFO]   Conformer 0: MC=-25.6 -> min_chi=-25.6 -> min_all=-25.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1kj6A00_4/1kj6A00_4_backrub_000.pdb
+2026-04-03 15:57:24,101 [INFO]   Conformer 1: 384 backrub segments
+2026-04-03 15:57:50,280 [INFO]   Conformer 1: MC=-26.2 -> min_chi=-26.2 -> min_all=-26.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1kj6A00_4/1kj6A00_4_backrub_001.pdb
+2026-04-03 15:57:50,284 [INFO]   Conformer 2: 384 backrub segments
+2026-04-03 15:58:16,255 [INFO]   Conformer 2: MC=-25.6 -> min_chi=-25.6 -> min_all=-27.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1kj6A00_4/1kj6A00_4_backrub_002.pdb
+2026-04-03 15:58:16,259 [INFO]   Conformer 3: 384 backrub segments
+2026-04-03 15:58:43,653 [INFO]   Conformer 3: MC=-25.6 -> min_chi=-25.6 -> min_all=-27.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1kj6A00_4/1kj6A00_4_backrub_003.pdb
+2026-04-03 15:58:43,656 [INFO]   Conformer 4: 384 backrub segments
+2026-04-03 15:59:09,418 [INFO]   Conformer 4: MC=-25.6 -> min_chi=-25.6 -> min_all=-27.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1kj6A00_4/1kj6A00_4_backrub_004.pdb
+2026-04-03 16:16:32,047 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 16:16:32,067 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 16:16:32,113 [INFO] Running PyRosetta on 1m1jB03_0_reres (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 16:16:47,460 [INFO]   Initial score: 624.8
+2026-04-03 16:16:54,452 [INFO] Post-idealize score: 613.9
+2026-04-03 16:16:54,693 [INFO] Post-repack score: 482.0
+2026-04-03 16:16:54,790 [INFO] Post-minimize (chi only): 459.3
+2026-04-03 16:16:57,277 [INFO]   Post-minimize (chi+bb): -127.7
+2026-04-03 16:16:57,331 [INFO]   Conformer 0: 1376 backrub segments
+2026-04-03 16:17:41,170 [INFO]   Conformer 0: MC=-132.6 -> min_chi=-132.6 -> min_all=-136.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1m1jB03_0_reres/1m1jB03_0_reres_backrub_000.pdb
+2026-04-03 16:17:41,180 [INFO]   Conformer 1: 1376 backrub segments
+2026-04-03 16:18:26,421 [INFO]   Conformer 1: MC=-130.6 -> min_chi=-130.6 -> min_all=-138.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1m1jB03_0_reres/1m1jB03_0_reres_backrub_001.pdb
+2026-04-03 16:18:26,430 [INFO]   Conformer 2: 1376 backrub segments
+2026-04-03 16:19:06,997 [INFO]   Conformer 2: MC=-132.2 -> min_chi=-132.2 -> min_all=-132.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1m1jB03_0_reres/1m1jB03_0_reres_backrub_002.pdb
+2026-04-03 16:19:07,004 [INFO]   Conformer 3: 1376 backrub segments
+2026-04-03 16:19:49,536 [INFO]   Conformer 3: MC=-132.1 -> min_chi=-132.1 -> min_all=-136.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1m1jB03_0_reres/1m1jB03_0_reres_backrub_003.pdb
+2026-04-03 16:19:49,545 [INFO]   Conformer 4: 1376 backrub segments
+2026-04-03 16:20:32,257 [INFO]   Conformer 4: MC=-131.4 -> min_chi=-131.5 -> min_all=-140.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1m1jB03_0_reres/1m1jB03_0_reres_backrub_004.pdb
+2026-04-03 18:16:31,757 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 18:16:31,805 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 18:16:31,839 [INFO] Running PyRosetta on 1uddA00_6 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 18:16:49,101 [INFO]   Initial score: 141.0
+2026-04-03 18:17:11,406 [INFO] Post-idealize score: 222.3
+2026-04-03 18:17:13,897 [INFO] Post-repack score: -325.7
+2026-04-03 18:17:14,920 [INFO] Post-minimize (chi only): -378.9
+2026-04-03 18:17:24,777 [INFO]   Post-minimize (chi+bb): -541.0
+2026-04-03 18:17:24,826 [INFO]   Conformer 0: 2126 backrub segments
+2026-04-03 18:18:29,706 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 18:18:29,707 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 18:18:29,752 [INFO] Running PyRosetta on 1ui5A00_30 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 18:18:42,289 [INFO]   Initial score: 601.8
+2026-04-03 18:19:05,631 [INFO] Post-idealize score: 843.1
+2026-04-03 18:19:07,756 [INFO] Post-repack score: 129.2
+2026-04-03 18:19:09,180 [INFO] Post-minimize (chi only): 44.4
+2026-04-03 18:19:15,631 [INFO]   Post-minimize (chi+bb): -405.9
+2026-04-03 18:19:15,672 [INFO]   Conformer 0: 1910 backrub segments
+2026-04-03 18:20:54,368 [INFO]   Conformer 0: MC=-541.3 -> min_chi=-541.3 -> min_all=-542.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1uddA00_6/1uddA00_6_backrub_000.pdb
+2026-04-03 18:20:54,401 [INFO]   Conformer 1: 2126 backrub segments
+2026-04-03 18:21:17,756 [INFO]   Conformer 0: MC=-406.3 -> min_chi=-406.3 -> min_all=-406.5 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1ui5A00_30/1ui5A00_30_backrub_000.pdb
+2026-04-03 18:21:17,776 [INFO]   Conformer 1: 1910 backrub segments
+2026-04-03 18:23:20,661 [INFO]   Conformer 1: MC=-405.9 -> min_chi=-405.9 -> min_all=-407.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1ui5A00_30/1ui5A00_30_backrub_001.pdb
+2026-04-03 18:23:20,675 [INFO]   Conformer 2: 1910 backrub segments
+2026-04-03 18:24:29,763 [INFO]   Conformer 1: MC=-541.0 -> min_chi=-541.0 -> min_all=-541.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1uddA00_6/1uddA00_6_backrub_001.pdb
+2026-04-03 18:24:29,783 [INFO]   Conformer 2: 2126 backrub segments
+2026-04-03 18:25:23,839 [INFO]   Conformer 2: MC=-405.9 -> min_chi=-405.9 -> min_all=-407.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1ui5A00_30/1ui5A00_30_backrub_002.pdb
+2026-04-03 18:25:23,854 [INFO]   Conformer 3: 1910 backrub segments
+2026-04-03 18:27:25,184 [INFO]   Conformer 3: MC=-406.0 -> min_chi=-406.0 -> min_all=-407.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1ui5A00_30/1ui5A00_30_backrub_003.pdb
+2026-04-03 18:27:25,214 [INFO]   Conformer 4: 1910 backrub segments
+2026-04-03 18:28:01,407 [INFO]   Conformer 2: MC=-541.0 -> min_chi=-541.0 -> min_all=-541.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1uddA00_6/1uddA00_6_backrub_002.pdb
+2026-04-03 18:28:01,446 [INFO]   Conformer 3: 2126 backrub segments
+2026-04-03 18:29:26,435 [INFO]   Conformer 4: MC=-405.9 -> min_chi=-405.9 -> min_all=-407.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1ui5A00_30/1ui5A00_30_backrub_004.pdb
+2026-04-03 18:31:38,781 [INFO]   Conformer 3: MC=-541.1 -> min_chi=-541.1 -> min_all=-541.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1uddA00_6/1uddA00_6_backrub_003.pdb
+2026-04-03 18:31:38,799 [INFO]   Conformer 4: 2126 backrub segments
+2026-04-03 18:35:14,222 [INFO]   Conformer 4: MC=-541.0 -> min_chi=-541.0 -> min_all=-541.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1uddA00_6/1uddA00_6_backrub_004.pdb
+2026-04-03 18:40:37,647 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 18:40:37,658 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 18:40:37,712 [INFO] Running PyRosetta on 1vjqA00_26 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 18:40:46,105 [INFO]   Initial score: 107.2
+2026-04-03 18:40:47,984 [INFO] Post-idealize score: 293.8
+2026-04-03 18:40:48,556 [INFO] Post-repack score: 131.4
+2026-04-03 18:40:48,651 [INFO] Post-minimize (chi only): 131.3
+2026-04-03 18:40:50,039 [INFO]   Post-minimize (chi+bb): -156.1
+2026-04-03 18:40:50,059 [INFO]   Conformer 0: 545 backrub segments
+2026-04-03 18:41:48,087 [INFO]   Conformer 0: MC=-156.1 -> min_chi=-156.1 -> min_all=-156.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vjqA00_26/1vjqA00_26_backrub_000.pdb
+2026-04-03 18:41:48,093 [INFO]   Conformer 1: 545 backrub segments
+2026-04-03 18:42:41,798 [INFO]   Conformer 1: MC=-156.1 -> min_chi=-156.1 -> min_all=-156.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vjqA00_26/1vjqA00_26_backrub_001.pdb
+2026-04-03 18:42:41,803 [INFO]   Conformer 2: 545 backrub segments
+2026-04-03 18:43:34,498 [INFO]   Conformer 2: MC=-156.1 -> min_chi=-156.1 -> min_all=-156.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vjqA00_26/1vjqA00_26_backrub_002.pdb
+2026-04-03 18:43:34,517 [INFO]   Conformer 3: 545 backrub segments
+2026-04-03 18:44:27,315 [INFO]   Conformer 3: MC=-156.1 -> min_chi=-156.1 -> min_all=-156.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vjqA00_26/1vjqA00_26_backrub_003.pdb
+2026-04-03 18:44:27,330 [INFO]   Conformer 4: 545 backrub segments
+2026-04-03 18:45:29,194 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 18:45:29,204 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 18:45:29,235 [INFO] Running PyRosetta on 1vq8200_2 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 18:45:29,491 [INFO]   Conformer 4: MC=-156.1 -> min_chi=-156.1 -> min_all=-156.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vjqA00_26/1vjqA00_26_backrub_004.pdb
+2026-04-03 18:45:34,454 [INFO]   Initial score: 436.6
+2026-04-03 18:45:35,567 [INFO] Post-idealize score: 474.8
+2026-04-03 18:45:35,890 [INFO] Post-repack score: 239.2
+2026-04-03 18:45:36,039 [INFO] Post-minimize (chi only): 168.0
+2026-04-03 18:45:36,440 [INFO]   Post-minimize (chi+bb): -52.0
+2026-04-03 18:45:36,452 [INFO]   Conformer 0: 301 backrub segments
+2026-04-03 18:45:55,129 [INFO]   Conformer 0: MC=-52.0 -> min_chi=-52.0 -> min_all=-52.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vq8200_2/1vq8200_2_backrub_000.pdb
+2026-04-03 18:45:55,131 [INFO]   Conformer 1: 301 backrub segments
+2026-04-03 18:46:14,014 [INFO]   Conformer 1: MC=-52.0 -> min_chi=-52.0 -> min_all=-52.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vq8200_2/1vq8200_2_backrub_001.pdb
+2026-04-03 18:46:14,016 [INFO]   Conformer 2: 301 backrub segments
+2026-04-03 18:46:33,419 [INFO]   Conformer 2: MC=-52.1 -> min_chi=-52.1 -> min_all=-52.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vq8200_2/1vq8200_2_backrub_002.pdb
+2026-04-03 18:46:33,423 [INFO]   Conformer 3: 301 backrub segments
+2026-04-03 18:46:52,783 [INFO]   Conformer 3: MC=-52.0 -> min_chi=-52.0 -> min_all=-52.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vq8200_2/1vq8200_2_backrub_003.pdb
+2026-04-03 18:46:52,787 [INFO]   Conformer 4: 301 backrub segments
+2026-04-03 18:47:11,930 [INFO]   Conformer 4: MC=-52.0 -> min_chi=-52.0 -> min_all=-52.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1vq8200_2/1vq8200_2_backrub_004.pdb
+2026-04-03 19:07:33,175 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 19:07:33,192 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 19:07:33,244 [INFO] Running PyRosetta on 1wtbA00_28 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 19:07:40,587 [INFO]   Initial score: 318.4
+2026-04-03 19:07:43,348 [INFO] Post-idealize score: 327.3
+2026-04-03 19:07:44,281 [INFO] Post-repack score: 26.1
+2026-04-03 19:07:44,872 [INFO] Post-minimize (chi only): -13.4
+2026-04-03 19:07:46,492 [INFO]   Post-minimize (chi+bb): -161.8
+2026-04-03 19:07:46,512 [INFO]   Conformer 0: 725 backrub segments
+2026-04-03 19:08:56,720 [INFO]   Conformer 0: MC=-161.8 -> min_chi=-161.8 -> min_all=-162.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1wtbA00_28/1wtbA00_28_backrub_000.pdb
+2026-04-03 19:08:56,726 [INFO]   Conformer 1: 725 backrub segments
+2026-04-03 19:10:08,688 [INFO]   Conformer 1: MC=-162.1 -> min_chi=-162.1 -> min_all=-162.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1wtbA00_28/1wtbA00_28_backrub_001.pdb
+2026-04-03 19:10:08,693 [INFO]   Conformer 2: 725 backrub segments
+2026-04-03 19:11:21,524 [INFO]   Conformer 2: MC=-161.8 -> min_chi=-161.8 -> min_all=-162.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1wtbA00_28/1wtbA00_28_backrub_002.pdb
+2026-04-03 19:11:21,560 [INFO]   Conformer 3: 725 backrub segments
+2026-04-03 19:12:32,868 [INFO]   Conformer 3: MC=-162.0 -> min_chi=-162.0 -> min_all=-162.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1wtbA00_28/1wtbA00_28_backrub_003.pdb
+2026-04-03 19:12:32,875 [INFO]   Conformer 4: 725 backrub segments
+2026-04-03 19:13:45,771 [INFO]   Conformer 4: MC=-163.9 -> min_chi=-163.9 -> min_all=-164.8 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1wtbA00_28/1wtbA00_28_backrub_004.pdb
+2026-04-03 19:37:29,461 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 19:37:29,509 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 19:37:29,544 [INFO] Running PyRosetta on 1yb5A02_24 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 19:37:36,186 [INFO]   Initial score: 204.1
+2026-04-03 19:37:49,999 [INFO] Post-idealize score: 255.4
+2026-04-03 19:37:51,697 [INFO] Post-repack score: -219.2
+2026-04-03 19:37:51,965 [INFO] Post-minimize (chi only): -219.3
+2026-04-03 19:37:57,044 [INFO]   Post-minimize (chi+bb): -429.0
+2026-04-03 19:37:57,063 [INFO]   Conformer 0: 1760 backrub segments
+2026-04-03 19:40:19,024 [INFO]   Conformer 0: MC=-429.0 -> min_chi=-429.0 -> min_all=-429.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1yb5A02_24/1yb5A02_24_backrub_000.pdb
+2026-04-03 19:40:19,061 [INFO]   Conformer 1: 1760 backrub segments
+2026-04-03 19:42:41,522 [INFO]   Conformer 1: MC=-429.0 -> min_chi=-429.0 -> min_all=-429.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1yb5A02_24/1yb5A02_24_backrub_001.pdb
+2026-04-03 19:42:41,552 [INFO]   Conformer 2: 1760 backrub segments
+2026-04-03 19:45:04,656 [INFO]   Conformer 2: MC=-429.0 -> min_chi=-429.0 -> min_all=-429.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1yb5A02_24/1yb5A02_24_backrub_002.pdb
+2026-04-03 19:45:04,681 [INFO]   Conformer 3: 1760 backrub segments
+2026-04-03 19:47:27,063 [INFO]   Conformer 3: MC=-429.0 -> min_chi=-429.0 -> min_all=-429.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1yb5A02_24/1yb5A02_24_backrub_003.pdb
+2026-04-03 19:47:27,091 [INFO]   Conformer 4: 1760 backrub segments
+2026-04-03 19:49:51,449 [INFO]   Conformer 4: MC=-429.0 -> min_chi=-429.0 -> min_all=-429.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/1yb5A02_24/1yb5A02_24_backrub_004.pdb
+2026-04-03 21:36:27,878 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 21:36:27,895 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 21:36:27,922 [INFO] Running PyRosetta on 2f5xA01_21 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 21:36:32,695 [INFO]   Initial score: 279.2
+2026-04-03 21:36:43,765 [INFO] Post-idealize score: 1287.1
+2026-04-03 21:36:44,724 [INFO] Post-repack score: 621.7
+2026-04-03 21:36:45,308 [INFO] Post-minimize (chi only): 309.3
+2026-04-03 21:36:54,204 [INFO]   Post-minimize (chi+bb): -255.7
+2026-04-03 21:36:54,221 [INFO]   Conformer 0: 1481 backrub segments
+2026-04-03 21:37:29,072 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-03 21:37:29,073 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-03 21:37:29,100 [INFO] Running PyRosetta on 2f76X00_3_reres (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-03 21:37:33,707 [INFO]   Initial score: 1319.1
+2026-04-03 21:37:37,522 [INFO] Post-idealize score: 1261.1
+2026-04-03 21:37:38,490 [INFO] Post-repack score: 202.1
+2026-04-03 21:37:39,069 [INFO] Post-minimize (chi only): 77.6
+2026-04-03 21:37:40,491 [INFO]   Post-minimize (chi+bb): -155.3
+2026-04-03 21:37:40,503 [INFO]   Conformer 0: 955 backrub segments
+2026-04-03 21:38:40,428 [INFO]   Conformer 0: MC=-155.7 -> min_chi=-155.7 -> min_all=-158.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f76X00_3_reres/2f76X00_3_reres_backrub_000.pdb
+2026-04-03 21:38:40,434 [INFO]   Conformer 1: 955 backrub segments
+2026-04-03 21:38:48,428 [INFO]   Conformer 0: MC=-255.7 -> min_chi=-255.7 -> min_all=-256.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f5xA01_21/2f5xA01_21_backrub_000.pdb
+2026-04-03 21:38:48,437 [INFO]   Conformer 1: 1481 backrub segments
+2026-04-03 21:39:39,156 [INFO]   Conformer 1: MC=-155.3 -> min_chi=-155.3 -> min_all=-155.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f76X00_3_reres/2f76X00_3_reres_backrub_001.pdb
+2026-04-03 21:39:39,161 [INFO]   Conformer 2: 955 backrub segments
+2026-04-03 21:40:38,868 [INFO]   Conformer 2: MC=-155.3 -> min_chi=-155.3 -> min_all=-155.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f76X00_3_reres/2f76X00_3_reres_backrub_002.pdb
+2026-04-03 21:40:38,873 [INFO]   Conformer 3: 955 backrub segments
+2026-04-03 21:40:40,792 [INFO]   Conformer 1: MC=-256.6 -> min_chi=-256.6 -> min_all=-256.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f5xA01_21/2f5xA01_21_backrub_001.pdb
+2026-04-03 21:40:40,801 [INFO]   Conformer 2: 1481 backrub segments
+2026-04-03 21:41:38,959 [INFO]   Conformer 3: MC=-155.3 -> min_chi=-155.3 -> min_all=-155.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f76X00_3_reres/2f76X00_3_reres_backrub_003.pdb
+2026-04-03 21:41:38,964 [INFO]   Conformer 4: 955 backrub segments
+2026-04-03 21:42:33,770 [INFO]   Conformer 2: MC=-255.7 -> min_chi=-255.7 -> min_all=-256.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f5xA01_21/2f5xA01_21_backrub_002.pdb
+2026-04-03 21:42:33,780 [INFO]   Conformer 3: 1481 backrub segments
+2026-04-03 21:42:38,681 [INFO]   Conformer 4: MC=-155.6 -> min_chi=-155.6 -> min_all=-155.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f76X00_3_reres/2f76X00_3_reres_backrub_004.pdb
+2026-04-03 21:44:27,788 [INFO]   Conformer 3: MC=-255.7 -> min_chi=-255.7 -> min_all=-256.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f5xA01_21/2f5xA01_21_backrub_003.pdb
+2026-04-03 21:44:27,798 [INFO]   Conformer 4: 1481 backrub segments
+2026-04-03 21:46:19,203 [INFO]   Conformer 4: MC=-255.7 -> min_chi=-255.7 -> min_all=-256.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2f5xA01_21/2f5xA01_21_backrub_004.pdb
+2026-04-04 00:36:30,271 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 00:36:30,307 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 00:36:30,349 [INFO] Running PyRosetta on 2q0qA00_0 (5 conformers, 10000 MC steps, kT=0.6)
+
+ERROR: Assertion `! lines.empty()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/core/io/pdb/pdb_reader.cc line: 79
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 86, in run_backrub
+    pose = pyrosetta.pose_from_pdb(pdb_path)
+  File "/wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/io/__init__.py", line 20, in pose_from_pdb
+    return pose_from_file(filename)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/core/io/pdb/pdb_reader.cc:79
+[ ERROR ] UtilityExitException
+ERROR: Assertion `! lines.empty()` failed.
+
+
+2026-04-04 01:20:30,856 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 01:20:30,869 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 01:20:30,902 [INFO] Running PyRosetta on 2vgmA01_1 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 01:20:35,813 [INFO]   Initial score: 4013.8
+2026-04-04 01:20:47,053 [INFO] Post-idealize score: 5246.3
+2026-04-04 01:20:47,959 [INFO] Post-repack score: 1153.8
+2026-04-04 01:20:48,275 [INFO] Post-minimize (chi only): 1041.5
+2026-04-04 01:20:52,009 [INFO]   Post-minimize (chi+bb): 162.3
+2026-04-04 01:20:52,025 [INFO]   Conformer 0: 1189 backrub segments
+2026-04-04 01:22:10,842 [INFO]   Conformer 0: MC=-93.4 -> min_chi=-93.4 -> min_all=-182.2 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vgmA01_1/2vgmA01_1_backrub_000.pdb
+2026-04-04 01:22:10,850 [INFO]   Conformer 1: 1189 backrub segments
+2026-04-04 01:23:33,723 [INFO]   Conformer 1: MC=-90.8 -> min_chi=-90.8 -> min_all=-186.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vgmA01_1/2vgmA01_1_backrub_001.pdb
+2026-04-04 01:23:33,731 [INFO]   Conformer 2: 1189 backrub segments
+2026-04-04 01:24:31,044 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 01:24:31,045 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 01:24:31,094 [INFO] Running PyRosetta on 2vqeN00_6 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 01:24:38,112 [INFO]   Initial score: 1044.6
+2026-04-04 01:24:40,472 [INFO] Post-idealize score: 1084.3
+2026-04-04 01:24:41,180 [INFO] Post-repack score: 135.3
+2026-04-04 01:24:41,448 [INFO] Post-minimize (chi only): 90.1
+2026-04-04 01:24:42,724 [INFO]   Post-minimize (chi+bb): -72.6
+2026-04-04 01:24:42,740 [INFO]   Conformer 0: 453 backrub segments
+2026-04-04 01:24:55,253 [INFO]   Conformer 2: MC=-88.0 -> min_chi=-88.0 -> min_all=-138.1 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vgmA01_1/2vgmA01_1_backrub_002.pdb
+2026-04-04 01:24:55,260 [INFO]   Conformer 3: 1189 backrub segments
+2026-04-04 01:25:28,649 [INFO]   Conformer 0: MC=-72.6 -> min_chi=-72.6 -> min_all=-72.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vqeN00_6/2vqeN00_6_backrub_000.pdb
+2026-04-04 01:25:28,653 [INFO]   Conformer 1: 453 backrub segments
+2026-04-04 01:25:58,810 [INFO]   Conformer 1: MC=-75.7 -> min_chi=-75.7 -> min_all=-75.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vqeN00_6/2vqeN00_6_backrub_001.pdb
+2026-04-04 01:25:58,814 [INFO]   Conformer 2: 453 backrub segments
+2026-04-04 01:26:17,784 [INFO]   Conformer 3: MC=-91.0 -> min_chi=-91.0 -> min_all=-171.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vgmA01_1/2vgmA01_1_backrub_003.pdb
+2026-04-04 01:26:17,797 [INFO]   Conformer 4: 1189 backrub segments
+2026-04-04 01:26:30,566 [INFO]   Conformer 2: MC=-72.6 -> min_chi=-72.6 -> min_all=-72.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vqeN00_6/2vqeN00_6_backrub_002.pdb
+2026-04-04 01:26:30,570 [INFO]   Conformer 3: 453 backrub segments
+2026-04-04 01:27:03,609 [INFO]   Conformer 3: MC=-72.6 -> min_chi=-72.6 -> min_all=-72.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vqeN00_6/2vqeN00_6_backrub_003.pdb
+2026-04-04 01:27:03,613 [INFO]   Conformer 4: 453 backrub segments
+2026-04-04 01:27:35,908 [INFO]   Conformer 4: MC=-72.6 -> min_chi=-72.6 -> min_all=-72.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vqeN00_6/2vqeN00_6_backrub_004.pdb
+2026-04-04 01:27:40,192 [INFO]   Conformer 4: MC=-104.4 -> min_chi=-104.4 -> min_all=-189.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2vgmA01_1/2vgmA01_1_backrub_004.pdb
+2026-04-04 01:59:31,128 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 01:59:31,142 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 01:59:31,176 [INFO] Running PyRosetta on 2xotB01_2_reres (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 01:59:37,035 [INFO]   Initial score: -34.7
+2026-04-04 02:00:05,641 [INFO] Post-idealize score: -29.2
+2026-04-04 02:00:08,123 [INFO] Post-repack score: -345.8
+2026-04-04 02:00:09,321 [INFO] Post-minimize (chi only): -414.8
+2026-04-04 02:00:17,980 [INFO]   Post-minimize (chi+bb): -652.0
+2026-04-04 02:00:18,004 [INFO]   Conformer 0: 2272 backrub segments
+2026-04-04 02:03:19,957 [INFO]   Conformer 0: MC=-652.0 -> min_chi=-652.0 -> min_all=-659.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2xotB01_2_reres/2xotB01_2_reres_backrub_000.pdb
+2026-04-04 02:03:19,976 [INFO]   Conformer 1: 2272 backrub segments
+2026-04-04 02:06:10,255 [INFO]   Conformer 1: MC=-652.0 -> min_chi=-652.0 -> min_all=-659.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2xotB01_2_reres/2xotB01_2_reres_backrub_001.pdb
+2026-04-04 02:06:10,274 [INFO]   Conformer 2: 2272 backrub segments
+2026-04-04 02:09:16,137 [INFO]   Conformer 2: MC=-652.0 -> min_chi=-652.0 -> min_all=-659.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2xotB01_2_reres/2xotB01_2_reres_backrub_002.pdb
+2026-04-04 02:09:16,156 [INFO]   Conformer 3: 2272 backrub segments
+2026-04-04 02:12:19,882 [INFO]   Conformer 3: MC=-652.0 -> min_chi=-652.0 -> min_all=-659.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2xotB01_2_reres/2xotB01_2_reres_backrub_003.pdb
+2026-04-04 02:12:19,905 [INFO]   Conformer 4: 2272 backrub segments
+2026-04-04 02:15:29,839 [INFO]   Conformer 4: MC=-652.0 -> min_chi=-652.0 -> min_all=-656.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/2xotB01_2_reres/2xotB01_2_reres_backrub_004.pdb
+2026-04-04 03:02:31,448 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:31,448 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:31,467 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:31,468 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:31,501 [INFO] Running PyRosetta on 3buxB01_22_reres (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:31,504 [INFO] Running PyRosetta on 3bvfA_3 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:32,118 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:32,120 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:32,159 [INFO] Running PyRosetta on 3bvfA_22 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:32,721 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:32,721 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:32,753 [INFO] Running PyRosetta on 3bvfA_0 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:36,177 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:36,177 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:36,178 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:36,179 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:36,228 [INFO] Running PyRosetta on 3bvfA_11 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:36,230 [INFO] Running PyRosetta on 3bvfA_26 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:36,272 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:36,273 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:36,321 [INFO] Running PyRosetta on 3bvfA_9 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:36,788 [INFO]   Initial score: 1917.3
+2026-04-04 03:02:36,798 [INFO]   Initial score: 0.8
+2026-04-04 03:02:36,803 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:36,831 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:36,833 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:36,834 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:36,842 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:37,206 [INFO]   Initial score: 0.8
+2026-04-04 03:02:37,217 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:37,262 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:37,264 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:37,265 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:37,272 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:37,401 [INFO]   Initial score: 0.8
+2026-04-04 03:02:37,419 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:37,450 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:37,452 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:37,452 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:37,462 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:37,528 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 03:02:37,530 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 03:02:37,568 [INFO] Running PyRosetta on 3bvfA_8 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 03:02:42,844 [INFO]   Initial score: 0.8
+2026-04-04 03:02:42,857 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:42,890 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:42,892 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:42,892 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:42,903 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:44,237 [INFO]   Initial score: 0.8
+2026-04-04 03:02:44,237 [INFO]   Initial score: 0.8
+2026-04-04 03:02:44,241 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:44,241 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:44,286 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:44,288 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:44,289 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:44,291 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:44,292 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:44,294 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:44,299 [INFO]   Conformer 0: 0 backrub segments
+2026-04-04 03:02:44,302 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:45,622 [INFO]   Initial score: 0.8
+2026-04-04 03:02:45,843 [INFO] Post-idealize score: 0.9
+2026-04-04 03:02:45,877 [INFO] Post-repack score: 0.9
+2026-04-04 03:02:45,880 [INFO] Post-minimize (chi only): 0.9
+2026-04-04 03:02:45,881 [INFO]   Post-minimize (chi+bb): 0.9
+2026-04-04 03:02:45,894 [INFO]   Conformer 0: 0 backrub segments
+
+ERROR: Assertion `segments_.size()` failed.
+ERROR:: Exit from: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc line: 267
+Traceback (most recent call last):
+  File "scripts/data_preparation/run_backrub.py", line 307, in <module>
+    main()
+  File "scripts/data_preparation/run_backrub.py", line 299, in main
+    trajectory_stride=args.trajectory_stride)
+  File "scripts/data_preparation/run_backrub.py", line 168, in run_backrub
+    backrub_mover.apply(work_pose)
+RuntimeError: 
+
+File: /home/benchmark/rosetta/source/src/protocols/backrub/BackrubMover.cc:267
+[ ERROR ] UtilityExitException
+ERROR: Assertion `segments_.size()` failed.
+
+
+2026-04-04 03:02:46,396 [INFO] Post-idealize score: 1972.0
+2026-04-04 03:02:47,340 [INFO] Post-repack score: 273.0
+2026-04-04 03:02:48,207 [INFO] Post-minimize (chi only): 61.4
+2026-04-04 03:02:51,101 [INFO]   Post-minimize (chi+bb): -247.6
+2026-04-04 03:02:51,115 [INFO]   Conformer 0: 1077 backrub segments
+2026-04-04 03:04:25,974 [INFO]   Conformer 0: MC=-247.6 -> min_chi=-247.6 -> min_all=-247.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3buxB01_22_reres/3buxB01_22_reres_backrub_000.pdb
+2026-04-04 03:04:25,983 [INFO]   Conformer 1: 1077 backrub segments
+2026-04-04 03:06:00,590 [INFO]   Conformer 1: MC=-248.1 -> min_chi=-248.1 -> min_all=-255.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3buxB01_22_reres/3buxB01_22_reres_backrub_001.pdb
+2026-04-04 03:06:00,598 [INFO]   Conformer 2: 1077 backrub segments
+2026-04-04 03:07:38,171 [INFO]   Conformer 2: MC=-247.9 -> min_chi=-247.9 -> min_all=-248.0 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3buxB01_22_reres/3buxB01_22_reres_backrub_002.pdb
+2026-04-04 03:07:38,178 [INFO]   Conformer 3: 1077 backrub segments
+2026-04-04 03:09:15,924 [INFO]   Conformer 3: MC=-247.7 -> min_chi=-247.7 -> min_all=-247.9 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3buxB01_22_reres/3buxB01_22_reres_backrub_003.pdb
+2026-04-04 03:09:15,932 [INFO]   Conformer 4: 1077 backrub segments
+2026-04-04 03:10:52,270 [INFO]   Conformer 4: MC=-247.6 -> min_chi=-247.6 -> min_all=-247.7 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3buxB01_22_reres/3buxB01_22_reres_backrub_004.pdb
+2026-04-04 05:21:30,564 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 05:21:30,590 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 05:21:30,625 [INFO] Running PyRosetta on 3jzjA01_18 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 05:21:35,550 [INFO]   Initial score: 616.8
+2026-04-04 05:21:48,489 [INFO] Post-idealize score: 849.5
+2026-04-04 05:21:49,820 [INFO] Post-repack score: 81.8
+2026-04-04 05:21:51,282 [INFO] Post-minimize (chi only): 7.5
+2026-04-04 05:21:57,931 [INFO]   Post-minimize (chi+bb): -450.1
+2026-04-04 05:21:57,951 [INFO]   Conformer 0: 1789 backrub segments
+2026-04-04 05:24:28,650 [INFO]   Conformer 0: MC=-450.1 -> min_chi=-450.1 -> min_all=-450.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3jzjA01_18/3jzjA01_18_backrub_000.pdb
+2026-04-04 05:24:28,662 [INFO]   Conformer 1: 1789 backrub segments
+2026-04-04 05:26:55,646 [INFO]   Conformer 1: MC=-450.3 -> min_chi=-450.3 -> min_all=-450.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3jzjA01_18/3jzjA01_18_backrub_001.pdb
+2026-04-04 05:26:55,658 [INFO]   Conformer 2: 1789 backrub segments
+2026-04-04 05:29:24,141 [INFO]   Conformer 2: MC=-450.1 -> min_chi=-450.1 -> min_all=-450.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3jzjA01_18/3jzjA01_18_backrub_002.pdb
+2026-04-04 05:29:24,174 [INFO]   Conformer 3: 1789 backrub segments
+2026-04-04 05:31:51,365 [INFO]   Conformer 3: MC=-450.1 -> min_chi=-450.1 -> min_all=-450.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3jzjA01_18/3jzjA01_18_backrub_003.pdb
+2026-04-04 05:31:51,397 [INFO]   Conformer 4: 1789 backrub segments
+2026-04-04 05:34:16,037 [INFO]   Conformer 4: MC=-450.1 -> min_chi=-450.1 -> min_all=-450.3 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3jzjA01_18/3jzjA01_18_backrub_004.pdb
+2026-04-04 06:11:34,009 [INFO] Found rosetta database at: /wynton/home/rotation/jqmo/.conda/envs/mcsce/lib/python3.7/site-packages/pyrosetta/database; using it....
+2026-04-04 06:11:34,032 [INFO] ┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 PyRosetta-4                                  │
+│              Created in JHU by Sergey Lyskov and PyRosetta Team              │
+│              (C) Copyright Rosetta Commons Member Institutions               │
+│                                                                              │
+│ NOTE: USE OF PyRosetta FOR COMMERCIAL PURPOSES REQUIRE PURCHASE OF A LICENSE │
+│         See LICENSE.PyRosetta.md or email license@uw.edu for details         │
+└──────────────────────────────────────────────────────────────────────────────┘
+PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentOS.python37.Release 2024.39+release.59628fbc5bc09f1221e1642f1f8d157ce49b1410 2024-09-23T07:49:48] retrieved from: http://www.pyrosetta.org
+2026-04-04 06:11:34,077 [INFO] Running PyRosetta on 3mkrA00_3 (5 conformers, 10000 MC steps, kT=0.6)
+2026-04-04 06:11:41,145 [INFO]   Initial score: -249.1
+2026-04-04 06:12:26,107 [INFO] Post-idealize score: -182.6
+2026-04-04 06:12:29,405 [INFO] Post-repack score: -505.9
+2026-04-04 06:12:31,247 [INFO] Post-minimize (chi only): -572.2
+2026-04-04 06:12:42,888 [INFO]   Post-minimize (chi+bb): -781.4
+2026-04-04 06:12:42,926 [INFO]   Conformer 0: 2818 backrub segments
+2026-04-04 06:16:17,326 [INFO]   Conformer 0: MC=-781.4 -> min_chi=-781.4 -> min_all=-781.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3mkrA00_3/3mkrA00_3_backrub_000.pdb
+2026-04-04 06:16:17,374 [INFO]   Conformer 1: 2818 backrub segments
+2026-04-04 06:19:49,558 [INFO]   Conformer 1: MC=-781.4 -> min_chi=-781.4 -> min_all=-781.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3mkrA00_3/3mkrA00_3_backrub_001.pdb
+2026-04-04 06:19:49,608 [INFO]   Conformer 2: 2818 backrub segments
+2026-04-04 06:23:27,240 [INFO]   Conformer 2: MC=-781.4 -> min_chi=-781.4 -> min_all=-781.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3mkrA00_3/3mkrA00_3_backrub_002.pdb
+2026-04-04 06:23:27,268 [INFO]   Conformer 3: 2818 backrub segments
+2026-04-04 06:27:02,123 [INFO]   Conformer 3: MC=-781.4 -> min_chi=-781.4 -> min_all=-781.4 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3mkrA00_3/3mkrA00_3_backrub_003.pdb
+2026-04-04 06:27:02,160 [INFO]   Conformer 4: 2818 backrub segments
+2026-04-04 06:30:39,414 [INFO]   Conformer 4: MC=-781.5 -> min_chi=-781.5 -> min_all=-781.6 -> /wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_all_2/3mkrA00_3/3mkrA00_3_backrub_004.pdb

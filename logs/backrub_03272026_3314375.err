@@ -774,7 +774,3 @@ PyRosetta-4 2024 [Rosetta PyRosetta4.conda.linux.cxx11thread.serialization.CentO
 2026-03-27 17:02:41,682 [INFO]   Conformer 2: MC=-889.4 -> min_chi=-889.4 -> min_all=-890.2 -> /wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles/3sreA00_30/3sreA00_30_backrub_002.pdb
 2026-03-27 17:02:41,732 [INFO]   Conformer 3: 3105 backrub segments
 2026-03-27 17:04:16,842 [INFO]   Conformer 4: MC=-904.3 -> min_chi=-904.3 -> min_all=-904.3 -> /wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles/4ig1A00_19/4ig1A00_19_backrub_004.pdb
-2026-03-27 17:07:05,201 [INFO]   Conformer 4: MC=-625.6 -> min_chi=-625.6 -> min_all=-628.3 -> /wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles/3wx7A01_4/3wx7A01_4_backrub_004.pdb
-2026-03-27 17:08:27,726 [INFO]   Conformer 3: MC=-889.4 -> min_chi=-889.4 -> min_all=-890.2 -> /wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles/3sreA00_30/3sreA00_30_backrub_003.pdb
-2026-03-27 17:08:27,762 [INFO]   Conformer 4: 3105 backrub segments
-2026-03-27 17:14:40,876 [INFO]   Conformer 4: MC=-889.8 -> min_chi=-889.8 -> min_all=-891.8 -> /wynton/scratch/jqmo/rotation_datasets/ai-cath_backrub_subset_ensembles/3sreA00_30/3sreA00_30_backrub_004.pdb

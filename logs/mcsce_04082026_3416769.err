@@ -1,0 +1,146 @@
+2026-04-09 00:11:18,330 [INFO] Running mcsce-precompute on 3jzjA01_18 (100 attempts, device=CPU)
+2026-04-09 00:11:18,333 [INFO] Running mcsce-precompute on 1gcvA00_31 (100 attempts, device=CPU)
+2026-04-09 00:11:18,335 [INFO] Running mcsce-precompute on 3stjA03_13 (100 attempts, device=CPU)
+2026-04-09 00:11:18,336 [INFO] Running mcsce-precompute on 4b79B00_15_reres (100 attempts, device=CPU)
+2026-04-09 00:11:18,338 [INFO] Running mcsce-precompute on 1m1jB03_0_reres (100 attempts, device=CPU)
+2026-04-09 00:11:18,565 [INFO] Running mcsce-precompute on 3uk2A02_1 (100 attempts, device=CPU)
+2026-04-09 00:11:18,566 [INFO] Running mcsce-precompute on 1ui5A00_30 (100 attempts, device=CPU)
+2026-04-09 00:11:18,567 [INFO] Running mcsce-precompute on 4ig1A00_19 (100 attempts, device=CPU)
+2026-04-09 00:11:18,569 [INFO] Running mcsce-precompute on 1vq8200_2 (100 attempts, device=CPU)
+2026-04-09 00:11:18,569 [INFO] Running mcsce-precompute on 1wtbA00_28 (100 attempts, device=CPU)
+2026-04-09 00:11:18,570 [INFO] Running mcsce-precompute on 1kj6A00_4 (100 attempts, device=CPU)
+2026-04-09 00:11:18,572 [INFO] Running mcsce-precompute on 3uogA01_9 (100 attempts, device=CPU)
+2026-04-09 00:11:18,572 [INFO] Running mcsce-precompute on 3ossC00_7 (100 attempts, device=CPU)
+2026-04-09 00:11:18,573 [INFO] Running mcsce-precompute on 4pmnA00_16 (100 attempts, device=CPU)
+2026-04-09 00:11:18,574 [INFO] Running mcsce-precompute on 2vgmA01_1 (100 attempts, device=CPU)
+2026-04-09 00:11:18,575 [INFO] Running mcsce-precompute on 1yb5A02_24 (100 attempts, device=CPU)
+2026-04-09 00:11:18,575 [INFO] Running mcsce-precompute on 3mkrA00_3 (100 attempts, device=CPU)
+2026-04-09 00:11:18,576 [INFO] Running mcsce-precompute on 1vjqA00_26 (100 attempts, device=CPU)
+CPU)
+2026-04-09 00:11:18,576 [INFO] Running mcsce-precompute on 1uddA00_6 (100 attempts, device=CPU)
+2026-04-09 00:11:18,577 [INFO] Running mcsce-precompute on 3s3lA01_4 (100 attempts, device=CPU)
+2026-04-09 00:11:18,578 [INFO] Running mcsce-precompute on 2vqeN00_6 (100 attempts, device=CPU)
+2026-04-09 00:11:18,579 [INFO] Running mcsce-precompute on 2f5xA01_21 (100 attempts, device=CPU)
+2026-04-09 00:11:18,580 [INFO] Running mcsce-precompute on 2f76X00_3_reres (100 attempts, device=CPU)
+2026-04-09 00:11:18,582 [INFO] Running mcsce-precompute on 3buxB01_22_reres (100 attempts, device=CPU)
+2026-04-09 00:11:18,583 [INFO] Running mcsce-precompute on 3wx7A01_4 (100 attempts, device=CPU)
+2026-04-09 00:11:18,584 [INFO] Running mcsce-precompute on 4bszB00_23 (100 attempts, device=CPU)
+INFO:2026-04-09 00:11:20,342:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,342:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,342 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,342 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,344:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,344 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,345:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,345:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,345 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,345 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,347:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,347 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,351:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,351:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,351 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,351 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,352:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,352 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,396:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,396 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,449:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,449 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,543:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,543 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,569:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,569 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,599:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,599 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,646:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,646 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,666:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,666 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,729:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,729 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,908:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,908 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:20,925:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:20,925 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,055:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,055 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,076:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,076 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,086:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,086 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,137:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,137 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,141:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,141 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+INFO:2026-04-09 00:11:21,239:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,239 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:21,876 [ERROR] mcsce-precompute failed on 1kj6A00_4: KeyError: 'CYX'
+2026-04-09 00:11:23,809 [ERROR] mcsce-precompute failed on 2xotB01_2_reres: KeyError: 'CYX'
+2026-04-09 00:11:24,205 [ERROR] mcsce-precompute failed on 3sreA00_30: KeyError: 'CYX'
+2026-04-09 00:11:24,269 [ERROR] mcsce-precompute failed on 3wx7A01_4: KeyError: 'CYX'
+INFO:2026-04-09 00:11:24,317:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:24,317 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+WARNING:2026-04-09 00:11:24,318:jax._src.xla_bridge:794: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+2026-04-09 00:11:24,318 [WARNING] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+INFO:2026-04-09 00:11:25,316:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:25,316 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+WARNING:2026-04-09 00:11:25,317:jax._src.xla_bridge:794: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+2026-04-09 00:11:25,317 [WARNING] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+INFO:2026-04-09 00:11:25,623:jax._src.xla_bridge:752: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+2026-04-09 00:11:25,623 [INFO] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+WARNING:2026-04-09 00:11:25,624:jax._src.xla_bridge:794: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+2026-04-09 00:11:25,624 [WARNING] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/40 [00:00<?, ?it/s]  0%|          | 0/75 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/133 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/56 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/65 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/28 [00:00<?, ?it/s]  0%|          | 0/74 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/162 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/245 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/128 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/108 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/54 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/95 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/135 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/113 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/188 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/273 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/156 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/122 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/180 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/58 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/132 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/105 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/65 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/160 [00:00<?, ?it/s]/wynton/home/rotation/jqmo/.conda/envs/mcsce-precompute/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+  0%|          | 0/136 [00:00<?, ?it/s]
