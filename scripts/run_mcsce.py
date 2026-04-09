@@ -12,6 +12,21 @@ Environment setup:
 This script does in-process imports from mcsce-precompute. The Python
 env you run this from must therefore have ALL of the following installed:
 
+  mcsce-precompute deps:
+    - jax, jaxlib      (pip install "jax[cpu]"  — or "jax[cuda12]" for GPU)
+    - scipy
+    - numpy
+    - openmm           (conda install -c conda-forge openmm)
+    - pdbfixer         (conda install -c conda-forge pdbfixer)
+    - biopython        (pip install biopython)
+    - tqdm             (pip install tqdm)
+
+  + this wrapper's deps for the post-MCSCE cartesian min step:
+    - pyrosetta        (https://www.pyrosetta.org/downloads)
+
+Override the mcsce-precompute checkout location per host by exporting
+MCSCE_PRECOMPUTE_DIR before launching this script.
+
 Usage:
     python run_mcsce.py --pdb input.pdb --outdir ensembles/mcsce --nconfs 5
 
@@ -138,7 +153,8 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
         logger.error(
             f"Failed to import mcsce-precompute modules: {e}\n"
             f"  Make sure MCSCE_PRECOMPUTE_DIR points at your local clone "
-            f"({MCSCE_PRECOMPUTE_DIR}) and that openmm/pdbfixer/biopython/tqdm "
+            f"({MCSCE_PRECOMPUTE_DIR}) and that ALL of "
+            f"jax/scipy/numpy/openmm/pdbfixer/biopython/tqdm "
             f"are installed in this Python env."
         )
         raise

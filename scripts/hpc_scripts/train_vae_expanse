@@ -13,7 +13,7 @@
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
-# End-to-end VAE training pipeline on Expanse:
+# End-to-end VAE training workflow on Expanse:
 #   1. Featurize the AI-CATH PDB subset into (7, L, L) .npy stacks
 #      (vae/featurize_pdb.py — Calpha/Cbeta distance maps, contact map,
 #       hydrophobicity / charge / polarity / SASA pair features).
@@ -24,11 +24,11 @@
 #      the best-val checkpoint and writes test_metrics.json.
 #
 # Outputs (under $output_dir):
-#   vae_best.pt              — best-val state_dict + hparams
-#   history.json             — per-epoch train/val losses
-#   test_metrics.json        — held-out test loss + best val loss
-#   reconstruction_*.png     — input vs reconstruction grid (channel 0)
-#   sample_*.npy             — prior samples after each epoch
+#   vae_best.pt              best-val state_dict + hparams
+#   history.json             per-epoch train/val losses
+#   test_metrics.json        held-out test loss + best val loss
+#   reconstruction.png     input vs reconstruction grid (channel 0)
+#   sample.npy             prior samples after each epoch
 
 set -euo pipefail
 
@@ -43,8 +43,7 @@ fi
 nvidia-smi || echo "nvidia-smi not available"
 
 # Manually activate the bioengc242 conda env without needing the `conda`
-# command (it's not on PATH on Expanse compute nodes). This just prepends
-# the env's bin/ to PATH and sets CONDA_PREFIX so tools behave correctly.
+# command (it's not on PATH on Expanse compute nodes)
 CONDA_ENV_PATH="${CONDA_ENV_PATH:-$HOME/.conda/envs/bioengc242}"
 if [ ! -x "$CONDA_ENV_PATH/bin/python" ]; then
     echo "ERROR: $CONDA_ENV_PATH/bin/python not found" >&2
@@ -58,47 +57,36 @@ echo "Using python: $(which python)"
 python --version
 python -c "import torch; print('torch', torch.__version__, 'cuda runtime', torch.version.cuda, 'is_available', torch.cuda.is_available())" || true
 
-# vae.py + featurize_pdb.py both live under vae/, no install needed —
-# just resolve the repo root so we can run them from anywhere.
+
+
+# DEFINE PATHS 
+# IMPORTANT!! note that some paths may need to be updated. as of now, they are fine. 
+# but once I add more conformers, the paths may need to change. rn my stuff is 
+# just added to the main dataset path.  
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 echo "Repo root: $REPO_ROOT"
 cd "$REPO_ROOT"
 
-# -----------------------------------------------------------------------------
-# Paths
-# -----------------------------------------------------------------------------
 model_name="vae_cath20_$(date +%Y%m%d_%H%M%S)"
-
-# Source PDB directory (AI-CATH subset on Expanse scratch). Override at
-# submit time with: sbatch --export=PDB_DIR=/path/... submit_train_expanse.sbatch
-PDB_DIR="${PDB_DIR:-/expanse/lustre/scratch/jqmo/temp_project/datasets/ai-cath_subset}"
-
-# Cached feature .npy stacks. Step 1 is skipped if this dir already has the
-# expected number of files (cheap rerun for hyperparameter sweeps).
+PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree/mpnn_esmfold"
 feature_dir="${FEATURE_DIR:-${REPO_ROOT}/data/ai-cath_features}"
 
-# Per-run output directory (timestamped so reruns don't collide).
+# Per-run output directory
 output_dir="${REPO_ROOT}/output/${model_name}"
 
 mkdir -p "$feature_dir" "$output_dir" logs
 
-# -----------------------------------------------------------------------------
-# Hyperparameters — exposed as shell vars so reruns are obvious in the log
-# -----------------------------------------------------------------------------
+# HYPERPARAMETERS
 EPOCHS=100
 BATCH_SIZE=64
 Z_DIM=64
 LR=1e-3
 SEED=42
 
-# -----------------------------------------------------------------------------
-# Step 1: featurize PDBs into (7, L, L) .npy stacks
-# -----------------------------------------------------------------------------
-echo "============================================================"
+# Featurize
 echo "Step 1/2 — featurizing PDBs"
 echo "  source : $PDB_DIR"
 echo "  output : $feature_dir"
-echo "============================================================"
 
 n_pdbs=$(find "$PDB_DIR" -type f -name "*.pdb" | wc -l)
 n_npys=$(find "$feature_dir" -type f -name "*.npy" 2>/dev/null | wc -l)
@@ -120,11 +108,8 @@ if [ "$n_features" -eq 0 ]; then
     exit 1
 fi
 
-# -----------------------------------------------------------------------------
-# Step 2: train + per-epoch validate + final test on best-val checkpoint
-# -----------------------------------------------------------------------------
-echo "============================================================"
-echo "Step 2/2 — training Conv-VAE"
+# Train VAE
+echo "Training VAE"
 echo "  features  : $feature_dir"
 echo "  output    : $output_dir"
 echo "  epochs    : $EPOCHS"
@@ -132,7 +117,7 @@ echo "  batch     : $BATCH_SIZE"
 echo "  z_dim     : $Z_DIM"
 echo "  lr        : $LR"
 echo "  seed      : $SEED"
-echo "============================================================"
+
 
 WANDB_MODE=disabled python vae/vae.py \
     --feature-dir "${feature_dir}" \
@@ -143,7 +128,5 @@ WANDB_MODE=disabled python vae/vae.py \
     --lr "${LR}" \
     --seed "${SEED}"
 
-echo "============================================================"
 echo "Done. Outputs in $output_dir"
 ls -lh "$output_dir"
-echo "============================================================"
