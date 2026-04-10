@@ -35,16 +35,37 @@ Designed for HPC job arrays. Each job processes one PDB.
 
 import argparse
 import logging
+import multiprocessing
 import os
 import shutil
 import sys
 from pathlib import Path
+
+# Set multiprocessing start method to "spawn" BEFORE jax (or anything that
+# imports it) gets loaded. mcsce-precompute uses multiprocessing.Pool
+# internally; on Linux Pool defaults to fork, but JAX is multithreaded and
+# fork-after-thread leads to deadlock — see the runtime warning:
+#   "os.fork() ... JAX is multithreaded, so this will likely lead to a
+#    deadlock."
+# mcsce-precompute does this in its own __main__, but we import it as a
+# module so that block never runs.
+try:
+    multiprocessing.set_start_method("spawn", force=True)
+except RuntimeError:
+    pass
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# Verify spawn is active — fork + JAX threads causes deadlocks.
+if multiprocessing.get_start_method() != "spawn":
+    logger.warning(
+        f"multiprocessing start method is '{multiprocessing.get_start_method()}', "
+        "not 'spawn'. JAX deadlocks are possible."
+    )
 
 # Force unbuffered output — ensures HPC logs are written before crashes
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
@@ -110,6 +131,40 @@ def normalize_pdb_for_rosetta(pdb_path):
         out_lines.append(line)
 
     out_path = str(Path(pdb_path).parent / f"{Path(pdb_path).stem}_rosetta.pdb")
+    with open(out_path, 'w') as f:
+        f.writelines(out_lines)
+    return out_path
+
+
+def normalize_pdb_for_mcsce(pdb_path, out_path):
+    """Rename AMBER protonation/disulfide variants to canonical 3-letter codes
+    that mcsce-precompute's PDBData understands.
+
+    PDBFixer leaves CYX (disulfide-bonded Cys) and HID/HIE/HIP (His protonation
+    variants) alone because they're "standard" to AMBER, but mcsce-precompute's
+    PDBData.prepare_sidechain does a dict lookup on residue name and only
+    knows the canonical 3-letter codes (CYS, HIS), causing
+    `KeyError: 'CYX'` etc.
+
+    PDBData handles disulfides geometrically via get_ss_bonds (distance-based),
+    so renaming CYX → CYS is safe — the SS bond is detected from coords.
+    """
+    RESNAME_MAP = {
+        'CYX': 'CYS', 'CYM': 'CYS',
+        'HID': 'HIS', 'HIE': 'HIS', 'HIP': 'HIS',
+        'HSD': 'HIS', 'HSE': 'HIS', 'HSP': 'HIS',
+    }
+    with open(pdb_path) as f:
+        lines = f.readlines()
+    out_lines = []
+    for line in lines:
+        if not line.startswith(('ATOM', 'HETATM')):
+            out_lines.append(line)
+            continue
+        resname = line[17:20].strip()
+        if resname in RESNAME_MAP:
+            line = line[:17] + f"{RESNAME_MAP[resname]:>3}" + line[20:]
+        out_lines.append(line)
     with open(out_path, 'w') as f:
         f.writelines(out_lines)
     return out_path
@@ -199,6 +254,30 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
             return []
         pdb_path = relaxed_path
 
+    # Step 2b: Rename AMBER variants (CYX, HID/HIE/HIP, etc.) to canonical
+    # 3-letter codes that PDBData understands. PDBFixer leaves these alone.
+    normalized_path = os.path.join(work_dir, f"{stem}_normalized.pdb")
+    normalize_pdb_for_mcsce(pdb_path, normalized_path)
+    pdb_path = normalized_path
+
+    # Verify normalization succeeded — catch any residues our map missed.
+    with open(pdb_path) as _f:
+        for _line in _f:
+            if _line.startswith(('ATOM', 'HETATM')):
+                _rn = _line[17:20].strip()
+                if _rn == 'CYX':
+                    logger.error(
+                        f"Normalization failed: {stem} still contains CYX "
+                        f"residues in {pdb_path}"
+                    )
+                    break
+
+    # Remove stale pickle caches from previous failed runs — they may
+    # contain CYX-keyed data structures that cause KeyErrors.
+    for _pkl in Path(work_dir).glob("*.pkl"):
+        logger.info(f"Removing stale cache: {_pkl.name}")
+        _pkl.unlink()
+
     # Step 3: mcsce-precompute side chain ensemble generation.
     # Outputs land in {work_dir}/regrown_structures/regrow_*.pdb
     try:
@@ -223,10 +302,16 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     regrown = sorted(regrown_dir.glob("regrow_*.pdb")) if regrown_dir.exists() else []
 
     if len(regrown) == 0:
-        logger.warning(f"Generated 0 conformers for {stem}")
-        if failed_log:
-            with open(failed_log, "a") as fh:
-                fh.write(f"{original_pdb_path}\tZERO_CONFORMERS\t\n")
+        if device == "CPU":
+            logger.info(
+                f"Precomputation only (device=CPU) for {stem} — "
+                f"rerun with --device CUDA to generate conformers"
+            )
+        else:
+            logger.warning(f"Generated 0 conformers for {stem}")
+            if failed_log:
+                with open(failed_log, "a") as fh:
+                    fh.write(f"{original_pdb_path}\tZERO_CONFORMERS\t\n")
         return []
 
     # Move regrown conformers up into out_sub with cleaner names
