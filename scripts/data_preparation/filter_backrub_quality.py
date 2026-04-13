@@ -1,14 +1,24 @@
 #!/usr/bin/env python
-"""Filter backrub conformers by Rosetta score, sequence gaps, and DRMSD.
+"""Filter PDB datasets by Rosetta score, sequence gaps, and (optionally) DRMSD.
 
-Imports scoring/RMSD from existing modules. Criteria:
-  1. Rosetta score > 0 or outside [-1200, -400] -> remove
+Two modes:
+  --pdb-list FILE   Filter a flat list of PDBs (score + gap checks only).
+                    Writes kept paths to <output-dir>/kept_pdb_list.txt.
+  --data-dir DIR    Filter backrub ensembles vs originals (score + gap + DRMSD).
+
+Criteria:
+  1. Rosetta score > 0 or outside [score-min, score-max] -> remove
   2. Sequence gaps in residue numbering -> remove
-  3. DRMSD > 10 A vs original -> remove
+  3. DRMSD > drmsd-max vs original -> remove (ensemble mode only)
 
-Outputs filter_results.csv and statistics plots (RMSD, seq identity, chi KDE).
+Outputs filter_results.csv and before/after comparison plots.
 
 Usage:
+    # Filter a flat PDB list (pre-backrub dataset validation)
+    python scripts/data_preparation/filter_backrub_quality.py \
+        --pdb-list ai-cath_training_pdb.txt --output-dir /path/to/filtered
+
+    # Filter backrub ensembles
     python scripts/data_preparation/filter_backrub_quality.py \
         --data-dir /path/to/dataset --output-dir /path/to/filtered
 """
@@ -45,7 +55,7 @@ THREE_TO_ONE = {
 }
 
 
-# ── Rosetta scoring (same score function as run_backrub.py: beta_nov16) ───────
+# Rosetta scoring (same score function as run_backrub.py: beta_nov16) 
 
 def init_rosetta():
     """Initialize PyRosetta once, return the score function."""
@@ -71,7 +81,7 @@ def score_pdb(pdb_path, scorefxn):
         return None
 
 
-# ── Sequence gap detection ────────────────────────────────────────────────────
+# Sequence gap detection 
 
 def has_sequence_gaps(pdb_path):
     """Check for gaps in residue numbering (missing residues)."""
@@ -90,7 +100,7 @@ def has_sequence_gaps(pdb_path):
     return False
 
 
-# ── Sequence identity ─────────────────────────────────────────────────────────
+# Sequence identity 
 
 def get_sequence(pdb_path):
     parser = PDBParser(QUIET=True)
@@ -112,29 +122,166 @@ def sequence_identity(seq1, seq2):
     return sum(a == b for a, b in zip(seq1[:min_len], seq2[:min_len])) / min_len
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+def count_residues(pdb_path):
+    """Count standard amino acid residues in first model."""
+    parser = PDBParser(QUIET=True)
+    try:
+        structure = parser.get_structure(pdb_path.stem, str(pdb_path))
+    except Exception:
+        return 0
+    n = 0
+    for model in structure:
+        for chain in model:
+            n += sum(1 for res in chain if res.id[0] == " ")
+        break
+    return n
 
-def main():
-    parser = argparse.ArgumentParser(description="Filter backrub dataset by score, gaps, DRMSD")
-    parser.add_argument("--data-dir", type=str, required=True,
-                        help="Root dir with 'originals/' and ensemble subdirs")
-    parser.add_argument("--ensemble-dir", type=str, default=None,
-                        help="Ensemble dir (default: <data-dir>/ai-cath_backrub_subset_ensembles)")
-    parser.add_argument("--output-dir", type=str, required=True,
-                        help="Dir for filtered conformers and results")
-    parser.add_argument("--score-min", type=float, default=-1200)
-    parser.add_argument("--score-max", type=float, default=-400)
-    parser.add_argument("--drmsd-max", type=float, default=10.0)
-    parser.add_argument("--skip-chi", action="store_true", help="Skip chi angle KDE plots")
-    args = parser.parse_args()
 
-    data_dir = Path(args.data_dir)
+# ── Before/after comparison plots ─────────────────────────────────────────────
+
+def plot_before_after(df, col, label, color_before, color_after, figures_dir):
+    """Overlaid before/after histograms for a given metric."""
+    before = df[col].dropna()
+    after = df[df["kept"]][col].dropna()
+    if len(before) < 2:
+        return
+    fig, ax = plt.subplots(figsize=(9, 4))
+    sns.histplot(before, bins=40, color=color_before, edgecolor="white",
+                 linewidth=0.3, kde=True, ax=ax, label=f"Before (n={len(before)})", alpha=0.5)
+    if len(after) >= 2:
+        sns.histplot(after, bins=40, color=color_after, edgecolor="white",
+                     linewidth=0.3, kde=True, ax=ax, label=f"After (n={len(after)})", alpha=0.7)
+    ax.axvline(before.mean(), color=color_before, linestyle="--", alpha=0.6)
+    if len(after) >= 2:
+        ax.axvline(after.mean(), color=color_after, linestyle="--", alpha=0.8)
+    ax.set_xlabel(label)
+    ax.set_ylabel("Count")
+    ax.set_title(f"{label} — Before vs After Filtering")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(figures_dir / f"before_after_{col}.png", dpi=150)
+    plt.close(fig)
+    logger.info("Saved %s", figures_dir / f"before_after_{col}.png")
+
+
+# ── PDB-list mode (flat list, no ensemble comparison) ─────────────────────────
+
+def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_max, skip_chi):
+    """Filter a flat PDB list by Rosetta score and sequence gaps."""
+    with open(pdb_list_path) as f:
+        pdb_paths = [Path(line.strip()) for line in f if line.strip()]
+    logger.info("Loaded %d PDB paths from %s", len(pdb_paths), pdb_list_path)
+
+    scorefxn = init_rosetta()
+    records = []
+
+    for i, pdb_path in enumerate(pdb_paths):
+        if (i + 1) % 500 == 0:
+            logger.info("  Processing %d/%d ...", i + 1, len(pdb_paths))
+
+        rec = {"pdb": pdb_path.name, "pdb_path": str(pdb_path), "kept": False,
+               "removal_reason": None, "rosetta_score": None, "n_residues": None,
+               "has_gap": None}
+
+        rec["n_residues"] = count_residues(pdb_path)
+        if rec["n_residues"] == 0:
+            rec["removal_reason"] = "parse_failed"
+            records.append(rec)
+            continue
+
+        # Gap check
+        gap = has_sequence_gaps(pdb_path)
+        rec["has_gap"] = gap
+        if gap:
+            # Still score it so we can plot before/after
+            score = score_pdb(pdb_path, scorefxn)
+            rec["rosetta_score"] = score
+            rec["removal_reason"] = "sequence_gap"
+            records.append(rec)
+            continue
+
+        # Rosetta score
+        score = score_pdb(pdb_path, scorefxn)
+        rec["rosetta_score"] = score
+        if score is None:
+            rec["removal_reason"] = "score_failed"
+            records.append(rec)
+            continue
+        if score > 0 or score < score_min or score > score_max:
+            rec["removal_reason"] = "score"
+            records.append(rec)
+            continue
+
+        rec["kept"] = True
+        records.append(rec)
+
+    df = pd.DataFrame(records)
+    df.to_csv(output_dir / "filter_results.csv", index=False)
+
+    # Write kept PDB list
+    kept_df = df[df["kept"]]
+    kept_list_path = output_dir / "kept_pdb_list.txt"
+    kept_list_path.write_text("\n".join(kept_df["pdb_path"].tolist()) + "\n")
+
+    # Summary
+    total = len(df)
+    print("\n" + "=" * 70)
+    print("PDB DATASET QUALITY FILTER SUMMARY")
+    print("=" * 70)
+    print(f"  Total PDBs processed:    {total}")
+    print(f"  Kept:                    {kept_df.shape[0]} ({kept_df.shape[0]/max(total,1)*100:.1f}%)")
+    removed = df[~df["kept"]]
+    if len(removed):
+        print(f"  Removal breakdown:")
+        for reason, n in removed["removal_reason"].value_counts().items():
+            print(f"    {reason}: {n}")
+    if len(kept_df):
+        scores = kept_df["rosetta_score"].dropna()
+        print(f"  Kept score range:        [{scores.min():.1f}, {scores.max():.1f}]")
+        print(f"  Kept score mean:         {scores.mean():.1f} +/- {scores.std():.1f}")
+        res = kept_df["n_residues"].dropna()
+        print(f"  Kept residue range:      [{res.min():.0f}, {res.max():.0f}]")
+    print(f"  Kept list written to:    {kept_list_path}")
+    print("=" * 70 + "\n")
+
+    # Before/after plots
+    plot_before_after(df, "rosetta_score", "Rosetta Score (REU)",
+                      "#adb5bd", "#e76f51", figures_dir)
+    plot_before_after(df, "n_residues", "Number of Residues",
+                      "#adb5bd", "#457b9d", figures_dir)
+
+    # Chi angle KDE: before vs after
+    if not skip_chi:
+        logger.info("Generating chi angle KDE plots (before vs after)...")
+        from collections import defaultdict
+        from plot_chi_angle_kde import extract_chi_angles_from_pdb
+
+        def extract_from_paths(paths, max_files=2000):
+            all_angles = defaultdict(list)
+            for p in paths[:max_files]:
+                file_angles = extract_chi_angles_from_pdb(str(p))
+                for key, vals in file_angles.items():
+                    all_angles[key].extend(vals)
+            return {k: np.array(v) for k, v in all_angles.items()}
+
+        before_chi = extract_from_paths(pdb_paths)
+        after_chi = extract_from_paths([Path(p) for p in kept_df["pdb_path"].tolist()])
+        chi_data = {"Before filter": before_chi, "After filter": after_chi}
+
+        for resname in AA_WITH_CHI:
+            out_path = str(figures_dir / f"chi_angles_{resname}.png")
+            plot_kde_for_amino_acid(resname, chi_data, out_path)
+
+    logger.info("Done. Output: %s", output_dir)
+    return df
+
+
+# ── Ensemble mode (backrub conformers vs originals) ──────────────────────────
+
+def run_ensemble_mode(data_dir, ensemble_dir, output_dir, figures_dir,
+                      score_min, score_max, drmsd_max, skip_chi):
+    """Filter backrub ensembles by score, gaps, and DRMSD."""
     orig_dir = data_dir / "originals"
-    ensemble_dir = Path(args.ensemble_dir) if args.ensemble_dir else data_dir / "ai-cath_backrub_subset_ensembles"
-    output_dir = Path(args.output_dir)
-    figures_dir = output_dir / "figures"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    figures_dir.mkdir(parents=True, exist_ok=True)
 
     for d, name in [(orig_dir, "originals"), (ensemble_dir, "ensembles")]:
         if not d.is_dir():
@@ -169,7 +316,7 @@ def main():
 
             score = score_pdb(conf_pdb, scorefxn)
             rec["rosetta_score"] = score
-            if score is None or score > 0 or score < args.score_min or score > args.score_max:
+            if score is None or score > 0 or score < score_min or score > score_max:
                 rec["removal_reason"] = "score"
                 records.append(rec)
                 continue
@@ -180,7 +327,7 @@ def main():
             rec["rmsd"] = compute_rmsd_kabsch(ref_coords, mob_coords)
             rec["n_residues"] = min(len(ref_coords), len(mob_coords))
 
-            if np.isnan(drmsd) or drmsd > args.drmsd_max:
+            if np.isnan(drmsd) or drmsd > drmsd_max:
                 rec["removal_reason"] = "drmsd"
                 records.append(rec)
                 continue
@@ -189,7 +336,6 @@ def main():
             rec["kept"] = True
             records.append(rec)
 
-            # Copy kept conformer
             dst = output_dir / stem
             dst.mkdir(exist_ok=True)
             shutil.copy2(conf_pdb, dst / conf_pdb.name)
@@ -197,7 +343,7 @@ def main():
     df = pd.DataFrame(records)
     df.to_csv(output_dir / "filter_results.csv", index=False)
 
-    # ── Summary ───────────────────────────────────────────────────────────
+    # Summary
     total = len(df)
     kept_df = df[df["kept"]]
     print("\n" + "=" * 70)
@@ -217,31 +363,15 @@ def main():
                 print(f"  {label}: {vals.mean():.3f} +/- {vals.std():.3f}")
     print("=" * 70 + "\n")
 
-    # ── Plots (seaborn histplot + KDE, matching cath20_analysis.ipynb) ────
-    if len(kept_df) == 0:
-        return
+    # Before/after plots
+    for col, label in [("rosetta_score", "Rosetta Score (REU)"),
+                        ("drmsd", "Ca DRMSD (A)"),
+                        ("rmsd", "Ca RMSD (A)"),
+                        ("n_residues", "Number of Residues")]:
+        plot_before_after(df, col, label, "#adb5bd", "#2a9d8f", figures_dir)
 
-    for col, label, color in [("rmsd", "Ca RMSD (A)", "#2a9d8f"),
-                               ("drmsd", "Ca DRMSD (A)", "coral"),
-                               ("rosetta_score", "Rosetta Score (REU)", "#e76f51"),
-                               ("seq_identity", "Sequence Identity", "#264653")]:
-        vals = kept_df[col].dropna()
-        if len(vals) < 2:
-            continue
-        fig, ax = plt.subplots(figsize=(9, 4))
-        sns.histplot(vals, bins=30, color=color, edgecolor="white", linewidth=0.3, kde=True, ax=ax)
-        ax.axvline(vals.mean(), color=color, linestyle="--", alpha=0.7,
-                   label=f"mean={vals.mean():.3f}")
-        ax.set_xlabel(label)
-        ax.set_ylabel("Count")
-        ax.set_title(f"{label} distribution (n={len(vals)})")
-        ax.legend()
-        fig.tight_layout()
-        fig.savefig(figures_dir / f"filtered_{col}_hist.png", dpi=150)
-        plt.close(fig)
-
-    # Chi angle KDE plots (reuse plot_chi_angle_kde.py functions)
-    if not args.skip_chi:
+    # Chi angle KDE: before vs after
+    if not skip_chi:
         logger.info("Generating chi angle KDE plots...")
         chi_data = {"Filtered": extract_chi_angles_from_dir(str(output_dir))}
         for resname in AA_WITH_CHI:
@@ -249,6 +379,41 @@ def main():
             plot_kde_for_amino_acid(resname, chi_data, out_path)
 
     logger.info("Done. Output: %s", output_dir)
+    return df
+
+
+# Main
+
+def main():
+    parser = argparse.ArgumentParser(description="Filter PDB dataset by score, gaps, and DRMSD")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--pdb-list", type=str,
+                      help="Text file with one PDB path per line (flat list mode)")
+    mode.add_argument("--data-dir", type=str,
+                      help="Root dir with 'originals/' and ensemble subdirs (ensemble mode)")
+    parser.add_argument("--ensemble-dir", type=str, default=None,
+                        help="Ensemble dir (default: <data-dir>/ai-cath_backrub_subset_ensembles)")
+    parser.add_argument("--output-dir", type=str, required=True,
+                        help="Dir for filtered results and plots")
+    parser.add_argument("--score-min", type=float, default=-1200)
+    parser.add_argument("--score-max", type=float, default=-0)
+    parser.add_argument("--drmsd-max", type=float, default=10.0)
+    parser.add_argument("--skip-chi", action="store_true", help="Skip chi angle KDE plots")
+    args = parser.parse_args()
+
+    output_dir = Path(args.output_dir)
+    figures_dir = output_dir / "figures"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.pdb_list:
+        run_pdb_list_mode(args.pdb_list, output_dir, figures_dir,
+                          args.score_min, args.score_max, args.skip_chi)
+    else:
+        data_dir = Path(args.data_dir)
+        ensemble_dir = Path(args.ensemble_dir) if args.ensemble_dir else data_dir / "ai-cath_backrub_subset_ensembles"
+        run_ensemble_mode(data_dir, ensemble_dir, output_dir, figures_dir,
+                          args.score_min, args.score_max, args.drmsd_max, args.skip_chi)
 
 
 if __name__ == "__main__":
