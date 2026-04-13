@@ -68,6 +68,20 @@ parser.add_argument('--z-dim', type=int, default=64, metavar='Z',
                     help='dimensionality of the latent space (default: 64)')
 parser.add_argument('--lr', type=float, default=1e-3,
                     help='Adam learning rate (default: 1e-3)')
+parser.add_argument('--weight-decay', type=float, default=0.0,
+                    help='Adam weight decay / L2 regularization (default: 0)')
+parser.add_argument('--dropout', type=float, default=0.0,
+                    help='dropout probability in encoder/decoder (default: 0)')
+parser.add_argument('--use-batchnorm', action='store_true',
+                    help='add BatchNorm2d after each conv/deconv layer')
+parser.add_argument('--kl-anneal-epochs', type=int, default=0,
+                    help='linearly anneal KL weight from 0 to 1 over N epochs (0=off)')
+parser.add_argument('--lr-schedule', choices=['none', 'plateau', 'cosine'], default='none',
+                    help='learning rate schedule (default: none)')
+parser.add_argument('--lr-patience', type=int, default=10,
+                    help='patience for ReduceLROnPlateau (default: 10)')
+parser.add_argument('--early-stop-patience', type=int, default=0,
+                    help='stop if val loss does not improve for N epochs (0=off)')
 parser.add_argument('--no-accel', action='store_true',
                     help='disables accelerator')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -159,14 +173,25 @@ else:
 # The decoder of a VAE can be used as a generative model.
 
 class VAE(nn.Module):
-    def __init__(self, in_channels=N_CHANNELS, z_dim=args.z_dim):
+    def __init__(self, in_channels=N_CHANNELS, z_dim=args.z_dim,
+                 dropout=args.dropout, use_batchnorm=args.use_batchnorm):
         super(VAE, self).__init__()
+        self.dropout_p = dropout
+        self.use_bn = use_batchnorm
 
         # encoder: 64 to 32 to 16 to 8 to 4
-        self.conv1 = nn.Conv2d(in_channels, 16, kernel_size=4, padding=1, stride=2)  # conv1, in to 16    (64 to 32)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=4, padding=1, stride=2)           # conv2, 16 to 32    (32 to 16)
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=4, padding=1, stride=2)           # conv3, 32 to 64    (16 to 8)
-        self.conv4 = nn.Conv2d(64, 128, kernel_size=4, padding=1, stride=2)          # conv4, 64 to 128   (8 to 4)
+        self.conv1 = nn.Conv2d(in_channels, 16, kernel_size=4, padding=1, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=4, padding=1, stride=2)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=4, padding=1, stride=2)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=4, padding=1, stride=2)
+
+        if use_batchnorm:
+            self.bn_e1 = nn.BatchNorm2d(16)
+            self.bn_e2 = nn.BatchNorm2d(32)
+            self.bn_e3 = nn.BatchNorm2d(64)
+            self.bn_e4 = nn.BatchNorm2d(128)
+
+        self.drop = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
 
         # manually calculate the dimension after all convolutions
         self.dim_after_conv = 4
@@ -174,22 +199,39 @@ class VAE(nn.Module):
 
         # readout: parameterize log(sigma^2) instead of sigma directly so the
         # network output can take any real value (sigma^2 = exp(logvar) > 0)
-        # and the closed-form KL stays numerically stable. 
+        # and the closed-form KL stays numerically stable.
         self.fc21 = nn.Linear(self.hidden_dim, z_dim)
         self.fc22 = nn.Linear(self.hidden_dim, z_dim)
 
         # decoder: 4 to 8 to 16 to 32 to 64 dim
         self.fc3 = nn.Linear(z_dim, self.hidden_dim)
-        self.deconv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)            # 4  to 8
-        self.deconv2 = nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1)             # 8  to 16
-        self.deconv3 = nn.ConvTranspose2d(32, 16, kernel_size=4, stride=2, padding=1)             # 16 to 32
-        self.deconv4 = nn.ConvTranspose2d(16, in_channels, kernel_size=4, stride=2, padding=1)    # 32 to 64
+        self.deconv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
+        self.deconv2 = nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.deconv3 = nn.ConvTranspose2d(32, 16, kernel_size=4, stride=2, padding=1)
+        self.deconv4 = nn.ConvTranspose2d(16, in_channels, kernel_size=4, stride=2, padding=1)
+
+        if use_batchnorm:
+            self.bn_d1 = nn.BatchNorm2d(64)
+            self.bn_d2 = nn.BatchNorm2d(32)
+            self.bn_d3 = nn.BatchNorm2d(16)
+
+    def _enc_block(self, x, conv, bn=None):
+        h = conv(x)
+        if bn is not None:
+            h = bn(h)
+        return self.drop(F.relu(h))
+
+    def _dec_block(self, x, deconv, bn=None):
+        h = deconv(x)
+        if bn is not None:
+            h = bn(h)
+        return self.drop(F.relu(h))
 
     def encode(self, x):
-        h = F.relu(self.conv1(x))
-        h = F.relu(self.conv2(h))
-        h = F.relu(self.conv3(h))
-        h = F.relu(self.conv4(h))
+        h = self._enc_block(x, self.conv1, getattr(self, 'bn_e1', None))
+        h = self._enc_block(h, self.conv2, getattr(self, 'bn_e2', None))
+        h = self._enc_block(h, self.conv3, getattr(self, 'bn_e3', None))
+        h = self._enc_block(h, self.conv4, getattr(self, 'bn_e4', None))
         h = h.view(h.size(0), -1)
         return self.fc21(h), self.fc22(h)
 
@@ -199,11 +241,11 @@ class VAE(nn.Module):
         return mu + eps*std
 
     def decode(self, z):
-        h = F.relu(self.fc3(z))
+        h = self.drop(F.relu(self.fc3(z)))
         h = h.view(h.size(0), 128, self.dim_after_conv, self.dim_after_conv)
-        h = F.relu(self.deconv1(h))
-        h = F.relu(self.deconv2(h))
-        h = F.relu(self.deconv3(h))
+        h = self._dec_block(h, self.deconv1, getattr(self, 'bn_d1', None))
+        h = self._dec_block(h, self.deconv2, getattr(self, 'bn_d2', None))
+        h = self._dec_block(h, self.deconv3, getattr(self, 'bn_d3', None))
         return torch.sigmoid(self.deconv4(h))
 
     def forward(self, x):
@@ -213,11 +255,26 @@ class VAE(nn.Module):
 
 
 model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=args.lr)
+optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+# LR scheduler
+scheduler = None
+if args.lr_schedule == 'plateau':
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=0.5, patience=args.lr_patience)
+elif args.lr_schedule == 'cosine':
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+
+
+def kl_weight(epoch):
+    """Linear KL annealing: weight goes from 0 to 1 over kl_anneal_epochs."""
+    if args.kl_anneal_epochs <= 0:
+        return 1.0
+    return min(1.0, epoch / args.kl_anneal_epochs)
 
 
 # Reconstruction + KL divergence losses summed over all elements and batch
-def loss_function(recon_x, x, mu, logvar):
+def loss_function(recon_x, x, mu, logvar, kl_w=1.0):
     BCE = F.binary_cross_entropy(recon_x, x, reduction='sum')
 
     # see Appendix B from VAE paper:
@@ -226,17 +283,18 @@ def loss_function(recon_x, x, mu, logvar):
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
-    return BCE + KLD
+    return BCE + kl_w * KLD
 
 
 def train(epoch):
     model.train()
     train_loss = 0
+    kl_w = kl_weight(epoch)
     for batch_idx, (data, _) in enumerate(train_loader):
         data = data.to(device)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
-        loss = loss_function(recon_batch, data, mu, logvar)
+        loss = loss_function(recon_batch, data, mu, logvar, kl_w=kl_w)
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
@@ -246,9 +304,10 @@ def train(epoch):
                 100. * batch_idx / len(train_loader),
                 loss.item() / len(data)))
 
-    print('Epoch: {} Average loss: {:.4f}'.format(
-          epoch, train_loss / len(train_loader.dataset)))
-    return train_loss / len(train_loader.dataset)
+    avg_loss = train_loss / len(train_loader.dataset)
+    print('Epoch: {} Average loss: {:.4f} (kl_weight={:.3f}, lr={:.2e})'.format(
+          epoch, avg_loss, kl_w, optimizer.param_groups[0]['lr']))
+    return avg_loss
 
 
 def validate(epoch):
@@ -260,7 +319,7 @@ def validate(epoch):
             recon_batch, mu, logvar = model(data)
             val_loss += loss_function(recon_batch, data, mu, logvar).item()
     val_loss /= len(val_loader.dataset)
-    print('angstrom Epoch: {} Validation loss: {:.4f}'.format(epoch, val_loss))
+    print('Epoch: {} Validation loss: {:.4f}'.format(epoch, val_loss))
     return val_loss
 
 
@@ -319,16 +378,31 @@ if __name__ == "__main__":
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
-    history = {"train": [], "val": []}
+    # Save hyperparameters for reproducibility
+    hparams = {k: v for k, v in vars(args).items()}
+    (outdir / "hparams.json").write_text(json.dumps(hparams, indent=2))
+
+    history = {"train": [], "val": [], "lr": []}
     best_val = float("inf")
+    epochs_no_improve = 0
+
     for epoch in range(1, args.epochs + 1):
         train_loss = train(epoch)
         val_loss = validate(epoch)
         history["train"].append(train_loss)
         history["val"].append(val_loss)
+        history["lr"].append(optimizer.param_groups[0]['lr'])
+
+        # LR scheduling
+        if scheduler is not None:
+            if args.lr_schedule == 'plateau':
+                scheduler.step(val_loss)
+            else:
+                scheduler.step()
 
         if val_loss < best_val:
             best_val = val_loss
+            epochs_no_improve = 0
             torch.save(
                 {
                     "state_dict": model.state_dict(),
@@ -336,21 +410,30 @@ if __name__ == "__main__":
                     "in_channels": N_CHANNELS,
                     "crop_size": CROP_SIZE,
                     "epoch": epoch,
+                    "hparams": hparams,
                 },
                 outdir / "vae_best.pt",
             )
+        else:
+            epochs_no_improve += 1
 
         with torch.no_grad():
             sample = torch.randn(64, args.z_dim).to(device)
             sample = model.decode(sample).cpu()
             np.save(outdir / f'sample_{epoch}.npy', sample.numpy())
 
+        # Early stopping
+        if args.early_stop_patience > 0 and epochs_no_improve >= args.early_stop_patience:
+            print(f'Early stopping at epoch {epoch} (no improvement for {epochs_no_improve} epochs)')
+            break
+
     # Final test-set evaluation on the best-val checkpoint
     ckpt = torch.load(outdir / "vae_best.pt", map_location=device)
     model.load_state_dict(ckpt["state_dict"])
-    test_loss = test(args.epochs)
+    test_loss = test(epoch)
 
     (outdir / "history.json").write_text(json.dumps(history, indent=2))
     (outdir / "test_metrics.json").write_text(
-        json.dumps({"test_loss": test_loss, "best_val": best_val}, indent=2)
+        json.dumps({"test_loss": test_loss, "best_val": best_val,
+                     "best_epoch": ckpt["epoch"], "total_epochs": epoch}, indent=2)
     )
