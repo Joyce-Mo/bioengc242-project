@@ -204,6 +204,7 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     try:
         from prepare_protein import fix_protein, relax_backbone
         from ensemble_gen import ensemble_gen
+        from definitions import RES_RADII
     except ImportError as e:
         logger.error(
             f"Failed to import mcsce-precompute modules: {e}\n"
@@ -213,6 +214,13 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
             f"are installed in this Python env."
         )
         raise
+
+    # mcsce-precompute creates CYX residues for disulfide cysteines
+    # (protein_data.py:315-316) but RES_RADII in definitions.py is
+    # missing the CYX entry, causing KeyError in rotamer_important_pairs.
+    # Patch the shared dict object so all modules see the fix.
+    if 'CYX' not in RES_RADII:
+        RES_RADII['CYX'] = RES_RADII['CYS']
 
     original_pdb_path = pdb_path
     stem = Path(pdb_path).stem
@@ -260,20 +268,8 @@ def run_mcsce(pdb_path, outdir, n_conformers, temperature, failed_log=None,
     normalize_pdb_for_mcsce(pdb_path, normalized_path)
     pdb_path = normalized_path
 
-    # Verify normalization succeeded — catch any residues our map missed.
-    with open(pdb_path) as _f:
-        for _line in _f:
-            if _line.startswith(('ATOM', 'HETATM')):
-                _rn = _line[17:20].strip()
-                if _rn == 'CYX':
-                    logger.error(
-                        f"Normalization failed: {stem} still contains CYX "
-                        f"residues in {pdb_path}"
-                    )
-                    break
-
-    # Remove stale pickle caches from previous failed runs — they may
-    # contain CYX-keyed data structures that cause KeyErrors.
+    # Remove stale pickle caches from previous failed runs so that
+    # recomputation uses the current (normalized) PDB.
     for _pkl in Path(work_dir).glob("*.pkl"):
         logger.info(f"Removing stale cache: {_pkl.name}")
         _pkl.unlink()

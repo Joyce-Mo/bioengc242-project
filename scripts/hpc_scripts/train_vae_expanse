@@ -1,132 +1,71 @@
 #!/bin/bash
 #SBATCH -A ucb368
-#SBATCH --job-name=train_vae_04062026
+#SBATCH --job-name=train_cc89_expanse
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=10
-#SBATCH --gpus=a100:1
+#SBATCH --gpus=a100:4
 #SBATCH --mem=92G
-#SBATCH --time=24:00:00
-#SBATCH -o logs/train_vae_04062026_%j.out
-#SBATCH -e logs/train_vae_04062026_%j.err
+#SBATCH --time=00:05:00
+#SBATCH -o logs/train_cc89_expanse_%j.out
+#SBATCH -e logs/train_cc89_expanse_%j.err
 #SBATCH -p gpu
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
-# End-to-end VAE training workflow on Expanse:
-#   1. Featurize the AI-CATH PDB subset into (7, L, L) .npy stacks
-#      (vae/featurize_pdb.py — Calpha/Cbeta distance maps, contact map,
-#       hydrophobicity / charge / polarity / SASA pair features).
-#   2. Train the Conv-VAE in vae/vae.py with a deterministic 70/15/15
-#      train/val/test split (sklearn, seed=$SEED), per-epoch validation,
-#      and best-val checkpointing.
-#   3. The training loop also runs the held-out test pass at the end on
-#      the best-val checkpoint and writes test_metrics.json.
-#
-# Outputs (under $output_dir):
-#   vae_best.pt              best-val state_dict + hparams
-#   history.json             per-epoch train/val losses
-#   test_metrics.json        held-out test loss + best val loss
-#   reconstruction.png     input vs reconstruction grid (channel 0)
-#   sample.npy             prior samples after each epoch
+# Train baseline Protpardelle (cc89 config) on Expanse.
+# cc89: all-atom EDM diffusion, DIT backbone, crop-conditional training,
+# self-conditioning prob 0.9, lr=1e-4, warmup 1000 steps, batch_size=32.
 
 set -euo pipefail
 
-if command -v module >/dev/null 2>&1; then
-    module purge
-    module load gpu/0.15.4
-    module load gcc/7.2.0
-
-fi
-
-# Diagnostic: print driver + torch CUDA info so mismatches are obvious in logs.
 nvidia-smi || echo "nvidia-smi not available"
 
-# Manually activate the bioengc242 conda env without needing the `conda`
-# command (it's not on PATH on Expanse compute nodes)
-CONDA_ENV_PATH="${CONDA_ENV_PATH:-$HOME/.conda/envs/bioengc242}"
+CONDA_ENV_PATH="${CONDA_ENV_PATH:-$HOME/.conda/envs/protpardelle}"
 if [ ! -x "$CONDA_ENV_PATH/bin/python" ]; then
     echo "ERROR: $CONDA_ENV_PATH/bin/python not found" >&2
     exit 1
 fi
 export PATH="$CONDA_ENV_PATH/bin:$PATH"
 export CONDA_PREFIX="$CONDA_ENV_PATH"
-export CONDA_DEFAULT_ENV=bioengc242
+export CONDA_DEFAULT_ENV=protpardelle
 
 echo "Using python: $(which python)"
 python --version
 python -c "import torch; print('torch', torch.__version__, 'cuda runtime', torch.version.cuda, 'is_available', torch.cuda.is_available())" || true
 
-
-
-# DEFINE PATHS 
-# IMPORTANT!! note that some paths may need to be updated. as of now, they are fine. 
-# but once I add more conformers, the paths may need to change. rn my stuff is 
-# just added to the main dataset path.  
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-echo "Repo root: $REPO_ROOT"
-cd "$REPO_ROOT"
-
-model_name="vae_cath20_$(date +%Y%m%d_%H%M%S)"
-PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree/mpnn_esmfold"
-feature_dir="${FEATURE_DIR:-${REPO_ROOT}/data/ai-cath_features}"
-
-# Per-run output directory
-output_dir="${REPO_ROOT}/output/${model_name}"
-
-mkdir -p "$feature_dir" "$output_dir" logs
-
-# HYPERPARAMETERS
-EPOCHS=100
-BATCH_SIZE=64
-Z_DIM=64
-LR=1e-3
-SEED=42
-
-# Featurize
-echo "Step 1/2 — featurizing PDBs"
-echo "  source : $PDB_DIR"
-echo "  output : $feature_dir"
-
-n_pdbs=$(find "$PDB_DIR" -type f -name "*.pdb" | wc -l)
-n_npys=$(find "$feature_dir" -type f -name "*.npy" 2>/dev/null | wc -l)
-echo "  found $n_pdbs PDB(s) under $PDB_DIR"
-echo "  found $n_npys existing .npy(s) under $feature_dir"
-
-if [ "$n_npys" -ge "$n_pdbs" ] && [ "$n_pdbs" -gt 0 ]; then
-    echo "  all PDBs already featurized — skipping featurization step"
-else
-    python vae/featurize_pdb.py \
-        --pdb-dir "$PDB_DIR" \
-        --outdir  "$feature_dir"
+# Ensure protpardelle is importable
+PROTPARDELLE_ROOT="$HOME/protpardelle-1c"
+if ! python -c "import protpardelle" 2>/dev/null; then
+    echo "Installing protpardelle from $PROTPARDELLE_ROOT"
+    pip install -e "$PROTPARDELLE_ROOT" --quiet
 fi
 
-n_features=$(find "$feature_dir" -type f -name "*.npy" | wc -l)
-echo "  $n_features feature stacks ready in $feature_dir"
-if [ "$n_features" -eq 0 ]; then
-    echo "ERROR: no .npy feature files produced — bailing out" >&2
+PROJECT_ROOT_DIR=$(python -c "from protpardelle.env import PROJECT_ROOT_DIR; print(PROJECT_ROOT_DIR)")
+
+model_name="${model_name:-cc89_anvil}"
+
+output_base="/expanse/lustre/scratch/jmo/temp_project"
+output_dir="${output_base}/${model_name}_${SLURM_JOB_ID}_$(date +%Y%m%d)"
+mkdir -p "$output_dir" logs
+
+config_path="${PROJECT_ROOT_DIR}/examples/training/${model_name}.yaml"
+project_name="protpardelle-1c"
+
+if [ ! -f "$config_path" ]; then
+    echo "ERROR: config not found: $config_path" >&2
     exit 1
 fi
 
-# Train VAE
-echo "Training VAE"
-echo "  features  : $feature_dir"
-echo "  output    : $output_dir"
-echo "  epochs    : $EPOCHS"
-echo "  batch     : $BATCH_SIZE"
-echo "  z_dim     : $Z_DIM"
-echo "  lr        : $LR"
-echo "  seed      : $SEED"
+echo "model_name=$model_name"
+echo "config_path=$config_path"
+echo "output_dir=$output_dir"
 
-
-WANDB_MODE=disabled python vae/vae.py \
-    --feature-dir "${feature_dir}" \
-    --outdir "${output_dir}" \
-    --epochs "${EPOCHS}" \
-    --batch-size "${BATCH_SIZE}" \
-    --z-dim "${Z_DIM}" \
-    --lr "${LR}" \
-    --seed "${SEED}"
+python -m protpardelle.train \
+    --config-path "${config_path}" \
+    --output-dir "${output_dir}" \
+    --project-name "${project_name}" \
+    --exp-name "${model_name}"
 
 echo "Done. Outputs in $output_dir"
 ls -lh "$output_dir"
