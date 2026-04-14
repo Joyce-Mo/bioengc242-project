@@ -34,7 +34,7 @@ echo "Using python: $(which python)"
 python --version
 python -c "import torch; print('torch', torch.__version__, 'cuda runtime', torch.version.cuda, 'is_available', torch.cuda.is_available())" || true
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfre
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
 OUTPUT_DIR="/expanse/lustre/scratch/jmo/temp_project/vae_production_${SLURM_JOB_ID}"
 
-mkdir -p "$FEATURE_DIR" "$OUTPUT_DIR"
+mkdir -p "$FEATURE_DIR" "$OUTPUT_DIR" logs
 
 # ── Featurize (skip if already done) ─────────────────────────────────────────
 n_pdbs=$(find "$PDB_DIR" -type f -name "*.pdb" 2>/dev/null | wc -l)

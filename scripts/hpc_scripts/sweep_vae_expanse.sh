@@ -30,11 +30,21 @@ export PATH="$CONDA_ENV_PATH/bin:$PATH"
 export CONDA_PREFIX="$CONDA_ENV_PATH"
 export CONDA_DEFAULT_ENV=bioengc242
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
 SWEEP_BASE="/expanse/lustre/scratch/jmo/temp_project/vae_sweep"
+
+# ── Check features exist ────────────────────────────────────────────────────
+n_npys=$(find "$FEATURE_DIR" -type f -name "*.npy" 2>/dev/null | wc -l)
+if [ "$n_npys" -eq 0 ]; then
+    echo "ERROR: No .npy features found in $FEATURE_DIR"
+    echo "Run train_vae_production_expanse.sh first to featurize, or featurize manually:"
+    echo "  python vae/featurize_pdb.py --pdb-dir <PDB_DIR> --outdir $FEATURE_DIR"
+    exit 1
+fi
+echo "Found $n_npys feature files in $FEATURE_DIR"
 
 # ── Sweep grid ────────────────────────────────────────────────────────────────
 # 24 configs: 2 z_dim x 2 lr x 2 dropout x 3 regularization combos

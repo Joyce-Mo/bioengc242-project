@@ -23,7 +23,8 @@ if [ "$MODE" = "pdb_list" ]; then
         --pdb-list "$PDB_LIST" \
         --output-dir "$OUTPUT_DIR" \
         --score-min -1200 \
-        --score-max -0
+        --score-max -0 \
+        --drmsd-max 2.0
 
 elif [ "$MODE" = "ensemble" ]; then
     # Filter backrub ensembles vs originals

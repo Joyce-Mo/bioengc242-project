@@ -122,6 +122,29 @@ def sequence_identity(seq1, seq2):
     return sum(a == b for a, b in zip(seq1[:min_len], seq2[:min_len])) / min_len
 
 
+def has_repeat_residues(seq, min_run=3):
+    """Check if sequence has any run of >= min_run identical residues."""
+    if len(seq) < min_run:
+        return False
+    count = 1
+    for i in range(1, len(seq)):
+        if seq[i] == seq[i - 1]:
+            count += 1
+            if count >= min_run:
+                return True
+        else:
+            count = 1
+    return False
+
+
+def aa_fractions(seq):
+    """Return fraction of alanine and glutamate in the sequence."""
+    n = len(seq)
+    if n == 0:
+        return 0.0, 0.0
+    return seq.count("A") / n, seq.count("E") / n
+
+
 def count_residues(pdb_path):
     """Count standard amino acid residues in first model."""
     parser = PDBParser(QUIET=True)
@@ -137,6 +160,52 @@ def count_residues(pdb_path):
     return n
 
 
+def protein_stem(pdb_name):
+    """Extract protein ID from conformer filename: '1jvbA02_3.pdb' -> '1jvbA02'."""
+    stem = Path(pdb_name).stem
+    # Strip trailing _N (conformer index)
+    parts = stem.rsplit("_", 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return parts[0]
+    return stem
+
+
+def compute_intra_protein_drmsd(group_paths):
+    """Compute max pairwise DRMSD among conformers of the same protein.
+
+    Returns dict mapping each pdb path -> max DRMSD to any sibling conformer.
+    """
+    coords_cache = {}
+    for p in group_paths:
+        _, coords = get_ca_atoms(p)
+        if len(coords) >= 3:
+            coords_cache[str(p)] = coords
+
+    paths = list(coords_cache.keys())
+    max_drmsd = {p: 0.0 for p in paths}
+
+    for i in range(len(paths)):
+        for j in range(i + 1, len(paths)):
+            d = compute_drmsd(coords_cache[paths[i]], coords_cache[paths[j]])
+            if not np.isnan(d):
+                max_drmsd[paths[i]] = max(max_drmsd[paths[i]], d)
+                max_drmsd[paths[j]] = max(max_drmsd[paths[j]], d)
+
+    return max_drmsd
+
+
+# ── Presentation-ready plot style ─────────────────────────────────────────────
+
+PLOT_RC = {
+    "font.size": 18,
+    "axes.titlesize": 22,
+    "axes.labelsize": 20,
+    "xtick.labelsize": 16,
+    "ytick.labelsize": 16,
+    "legend.fontsize": 16,
+}
+
+
 # ── Before/after comparison plots ─────────────────────────────────────────────
 
 def plot_before_after(df, col, label, color_before, color_after, figures_dir):
@@ -145,32 +214,53 @@ def plot_before_after(df, col, label, color_before, color_after, figures_dir):
     after = df[df["kept"]][col].dropna()
     if len(before) < 2:
         return
-    fig, ax = plt.subplots(figsize=(9, 4))
-    sns.histplot(before, bins=40, color=color_before, edgecolor="white",
-                 linewidth=0.3, kde=True, ax=ax, label=f"Before (n={len(before)})", alpha=0.5)
-    if len(after) >= 2:
-        sns.histplot(after, bins=40, color=color_after, edgecolor="white",
-                     linewidth=0.3, kde=True, ax=ax, label=f"After (n={len(after)})", alpha=0.7)
-    ax.axvline(before.mean(), color=color_before, linestyle="--", alpha=0.6)
-    if len(after) >= 2:
-        ax.axvline(after.mean(), color=color_after, linestyle="--", alpha=0.8)
-    ax.set_xlabel(label)
-    ax.set_ylabel("Count")
-    ax.set_title(f"{label} — Before vs After Filtering")
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(figures_dir / f"before_after_{col}.png", dpi=150)
-    plt.close(fig)
+    with plt.rc_context(PLOT_RC):
+        fig, ax = plt.subplots(figsize=(11, 5))
+        sns.histplot(before, bins=40, color=color_before, edgecolor="white",
+                     linewidth=0.3, kde=True, ax=ax, label=f"Before (n={len(before)})", alpha=0.5)
+        if len(after) >= 2:
+            sns.histplot(after, bins=40, color=color_after, edgecolor="white",
+                         linewidth=0.3, kde=True, ax=ax, label=f"After (n={len(after)})", alpha=0.7)
+        ax.axvline(before.mean(), color=color_before, linestyle="--", alpha=0.6)
+        if len(after) >= 2:
+            ax.axvline(after.mean(), color=color_after, linestyle="--", alpha=0.8)
+        ax.set_xlabel(label)
+        ax.set_ylabel("Count")
+        ax.set_title(f"{label} — Before vs After Filtering")
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(figures_dir / f"before_after_{col}.png", dpi=200)
+        plt.close(fig)
     logger.info("Saved %s", figures_dir / f"before_after_{col}.png")
 
 
 # ── PDB-list mode (flat list, no ensemble comparison) ─────────────────────────
 
-def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_max, skip_chi):
-    """Filter a flat PDB list by Rosetta score and sequence gaps."""
+def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
+                      score_min, score_max, drmsd_max, skip_chi):
+    """Filter a flat PDB list by Rosetta score, gaps, repeats, and intra-protein DRMSD."""
+    from collections import defaultdict as _defaultdict
+
     with open(pdb_list_path) as f:
         pdb_paths = [Path(line.strip()) for line in f if line.strip()]
     logger.info("Loaded %d PDB paths from %s", len(pdb_paths), pdb_list_path)
+
+    # Group conformers by protein stem (e.g. 1jvbA02_0.pdb -> 1jvbA02)
+    protein_groups = _defaultdict(list)
+    for p in pdb_paths:
+        protein_groups[protein_stem(p.name)].append(p)
+    logger.info("Found %d unique proteins", len(protein_groups))
+
+    # Compute intra-protein DRMSD (max pairwise DRMSD within each protein's conformers)
+    logger.info("Computing intra-protein pairwise DRMSD...")
+    all_max_drmsd = {}  # pdb_path_str -> max DRMSD to sibling
+    for prot_id, paths in protein_groups.items():
+        if len(paths) < 2:
+            for p in paths:
+                all_max_drmsd[str(p)] = 0.0
+            continue
+        drmsd_map = compute_intra_protein_drmsd(paths)
+        all_max_drmsd.update(drmsd_map)
 
     scorefxn = init_rosetta()
     records = []
@@ -179,9 +269,11 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
         if (i + 1) % 500 == 0:
             logger.info("  Processing %d/%d ...", i + 1, len(pdb_paths))
 
-        rec = {"pdb": pdb_path.name, "pdb_path": str(pdb_path), "kept": False,
+        rec = {"pdb": pdb_path.name, "pdb_path": str(pdb_path),
+               "protein": protein_stem(pdb_path.name), "kept": False,
                "removal_reason": None, "rosetta_score": None, "n_residues": None,
-               "has_gap": None}
+               "has_gap": None, "has_repeats": None,
+               "frac_ala": None, "frac_glu": None, "max_drmsd": None}
 
         rec["n_residues"] = count_residues(pdb_path)
         if rec["n_residues"] == 0:
@@ -189,11 +281,26 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
             records.append(rec)
             continue
 
+        # Sequence checks
+        seq = get_sequence(pdb_path)
+        frac_a, frac_e = aa_fractions(seq)
+        rec["frac_ala"] = frac_a
+        rec["frac_glu"] = frac_e
+
+        # Repeat residue check
+        repeats = has_repeat_residues(seq, min_run=3)
+        rec["has_repeats"] = repeats
+        if repeats:
+            score = score_pdb(pdb_path, scorefxn)
+            rec["rosetta_score"] = score
+            rec["removal_reason"] = "repeat_residues"
+            records.append(rec)
+            continue
+
         # Gap check
         gap = has_sequence_gaps(pdb_path)
         rec["has_gap"] = gap
         if gap:
-            # Still score it so we can plot before/after
             score = score_pdb(pdb_path, scorefxn)
             rec["rosetta_score"] = score
             rec["removal_reason"] = "sequence_gap"
@@ -209,6 +316,14 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
             continue
         if score > 0 or score < score_min or score > score_max:
             rec["removal_reason"] = "score"
+            records.append(rec)
+            continue
+
+        # Intra-protein DRMSD check
+        max_d = all_max_drmsd.get(str(pdb_path), 0.0)
+        rec["max_drmsd"] = max_d
+        if max_d > drmsd_max:
+            rec["removal_reason"] = "drmsd"
             records.append(rec)
             continue
 
@@ -229,7 +344,9 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
     print("PDB DATASET QUALITY FILTER SUMMARY")
     print("=" * 70)
     print(f"  Total PDBs processed:    {total}")
+    print(f"  Unique proteins:         {df['protein'].nunique()}")
     print(f"  Kept:                    {kept_df.shape[0]} ({kept_df.shape[0]/max(total,1)*100:.1f}%)")
+    print(f"  Proteins with >= 1 kept: {kept_df['protein'].nunique()}")
     removed = df[~df["kept"]]
     if len(removed):
         print(f"  Removal breakdown:")
@@ -241,6 +358,13 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
         print(f"  Kept score mean:         {scores.mean():.1f} +/- {scores.std():.1f}")
         res = kept_df["n_residues"].dropna()
         print(f"  Kept residue range:      [{res.min():.0f}, {res.max():.0f}]")
+        ala = kept_df["frac_ala"].dropna()
+        glu = kept_df["frac_glu"].dropna()
+        print(f"  Kept Ala fraction:       {ala.mean():.4f} +/- {ala.std():.4f}")
+        print(f"  Kept Glu fraction:       {glu.mean():.4f} +/- {glu.std():.4f}")
+        drmsd_vals = kept_df["max_drmsd"].dropna()
+        if len(drmsd_vals):
+            print(f"  Kept max DRMSD:          {drmsd_vals.mean():.3f} +/- {drmsd_vals.std():.3f} A")
     print(f"  Kept list written to:    {kept_list_path}")
     print("=" * 70 + "\n")
 
@@ -249,6 +373,12 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir, score_min, score_m
                       "#adb5bd", "#e76f51", figures_dir)
     plot_before_after(df, "n_residues", "Number of Residues",
                       "#adb5bd", "#457b9d", figures_dir)
+    plot_before_after(df, "frac_ala", "Alanine Fraction",
+                      "#adb5bd", "#2a9d8f", figures_dir)
+    plot_before_after(df, "frac_glu", "Glutamate Fraction",
+                      "#adb5bd", "#e9c46a", figures_dir)
+    plot_before_after(df, "max_drmsd", "Max Intra-Protein DRMSD (A)",
+                      "#adb5bd", "#264653", figures_dir)
 
     # Chi angle KDE: before vs after
     if not skip_chi:
@@ -408,7 +538,7 @@ def main():
 
     if args.pdb_list:
         run_pdb_list_mode(args.pdb_list, output_dir, figures_dir,
-                          args.score_min, args.score_max, args.skip_chi)
+                          args.score_min, args.score_max, args.drmsd_max, args.skip_chi)
     else:
         data_dir = Path(args.data_dir)
         ensemble_dir = Path(args.ensemble_dir) if args.ensemble_dir else data_dir / "ai-cath_backrub_subset_ensembles"
