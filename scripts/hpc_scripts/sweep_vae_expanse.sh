@@ -7,19 +7,19 @@
 #SBATCH --gpus=a100:1
 #SBATCH --mem=32G
 #SBATCH --time=12:00:00
-#SBATCH -o logs/sweep_vae_%A_%a.out
-#SBATCH -e logs/sweep_vae_%A_%a.err
+#SBATCH -o logs/sweep_vae_%j.out
+#SBATCH -e logs/sweep_vae_%j.err
 #SBATCH -p gpu
 #SBATCH --array=0-23
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
-# Hyperparameter sweep for VAE (Checkpoint 4).
-# Runs 24 configs as a SLURM job array — one GPU per run.
+# Hyperparameter sweep for VAE.
+# Runs 24 configs as a SLURM job array with one GPU per run.
 # Each config varies: z_dim, lr, dropout, weight_decay, kl_anneal, batchnorm.
-#
+
 # After all jobs finish, compare results with:
-#   python scripts/evaluation/compare_sweep.py /expanse/lustre/scratch/jmo/temp_project/vae_sweep
+# python scripts/evaluation/compare_sweep.py /expanse/lustre/scratch/jmo/temp_project/vae_sweep
 
 set -euo pipefail
 
@@ -33,10 +33,11 @@ export CONDA_DEFAULT_ENV=bioengc242
 REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
+# EXPLITLY defining this because this failed last time :( )
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
 SWEEP_BASE="/expanse/lustre/scratch/jmo/temp_project/vae_sweep"
 
-# ── Check features exist ────────────────────────────────────────────────────
+# Check features exist 
 n_npys=$(find "$FEATURE_DIR" -type f -name "*.npy" 2>/dev/null | wc -l)
 if [ "$n_npys" -eq 0 ]; then
     echo "ERROR: No .npy features found in $FEATURE_DIR"
@@ -46,8 +47,8 @@ if [ "$n_npys" -eq 0 ]; then
 fi
 echo "Found $n_npys feature files in $FEATURE_DIR"
 
-# ── Sweep grid ────────────────────────────────────────────────────────────────
-# 24 configs: 2 z_dim x 2 lr x 2 dropout x 3 regularization combos
+# Sweep grid 
+# 24 configuratioss: 2 z_dim x 2 lr x 2 dropout x 3 regularization combos
 Z_DIMS=(32 64)
 LRS=(1e-3 1e-4)
 DROPOUTS=(0.0 0.2)
