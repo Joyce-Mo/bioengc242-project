@@ -237,30 +237,17 @@ def plot_before_after(df, col, label, color_before, color_after, figures_dir):
 # ── PDB-list mode (flat list, no ensemble comparison) ─────────────────────────
 
 def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
-                      score_min, score_max, drmsd_max, skip_chi):
-    """Filter a flat PDB list by Rosetta score, gaps, repeats, and intra-protein DRMSD."""
-    from collections import defaultdict as _defaultdict
-
+                      score_min, score_max, rmsd_max, originals_dir, skip_chi):
+    """Filter a flat PDB list by Rosetta score, gaps, repeats, and RMSD vs original."""
     with open(pdb_list_path) as f:
         pdb_paths = [Path(line.strip()) for line in f if line.strip()]
     logger.info("Loaded %d PDB paths from %s", len(pdb_paths), pdb_list_path)
 
-    # Group conformers by protein stem (e.g. 1jvbA02_0.pdb -> 1jvbA02)
-    protein_groups = _defaultdict(list)
-    for p in pdb_paths:
-        protein_groups[protein_stem(p.name)].append(p)
-    logger.info("Found %d unique proteins", len(protein_groups))
-
-    # Compute intra-protein DRMSD (max pairwise DRMSD within each protein's conformers)
-    logger.info("Computing intra-protein pairwise DRMSD...")
-    all_max_drmsd = {}  # pdb_path_str -> max DRMSD to sibling
-    for prot_id, paths in protein_groups.items():
-        if len(paths) < 2:
-            for p in paths:
-                all_max_drmsd[str(p)] = 0.0
-            continue
-        drmsd_map = compute_intra_protein_drmsd(paths)
-        all_max_drmsd.update(drmsd_map)
+    # Cache original Ca coords (protein_stem -> coords array)
+    orig_coords_cache = {}
+    if originals_dir is not None:
+        originals_dir = Path(originals_dir)
+        logger.info("Originals dir: %s", originals_dir)
 
     scorefxn = init_rosetta()
     records = []
@@ -269,11 +256,12 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
         if (i + 1) % 500 == 0:
             logger.info("  Processing %d/%d ...", i + 1, len(pdb_paths))
 
+        stem = protein_stem(pdb_path.name)
         rec = {"pdb": pdb_path.name, "pdb_path": str(pdb_path),
-               "protein": protein_stem(pdb_path.name), "kept": False,
+               "protein": stem, "kept": False,
                "removal_reason": None, "rosetta_score": None, "n_residues": None,
                "has_gap": None, "has_repeats": None,
-               "frac_ala": None, "frac_glu": None, "max_drmsd": None}
+               "frac_ala": None, "frac_glu": None, "rmsd_vs_original": None}
 
         rec["n_residues"] = count_residues(pdb_path)
         if rec["n_residues"] == 0:
@@ -319,13 +307,26 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
             records.append(rec)
             continue
 
-        # Intra-protein DRMSD check
-        max_d = all_max_drmsd.get(str(pdb_path), 0.0)
-        rec["max_drmsd"] = max_d
-        if max_d > drmsd_max:
-            rec["removal_reason"] = "drmsd"
-            records.append(rec)
-            continue
+        # Kabsch RMSD vs original structure
+        if originals_dir is not None:
+            if stem not in orig_coords_cache:
+                orig_pdb = originals_dir / f"{stem}.pdb"
+                if orig_pdb.exists():
+                    _, coords = get_ca_atoms(orig_pdb)
+                    orig_coords_cache[stem] = coords if len(coords) >= 3 else None
+                else:
+                    orig_coords_cache[stem] = None
+
+            ref_coords = orig_coords_cache.get(stem)
+            if ref_coords is not None:
+                _, mob_coords = get_ca_atoms(pdb_path)
+                rmsd = compute_rmsd_kabsch(ref_coords, mob_coords)
+                rec["rmsd_vs_original"] = rmsd
+                if not np.isnan(rmsd) and rmsd > rmsd_max:
+                    rec["removal_reason"] = "rmsd"
+                    records.append(rec)
+                    continue
+            # If original not found, skip RMSD check (don't penalize)
 
         rec["kept"] = True
         records.append(rec)
@@ -362,9 +363,9 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
         glu = kept_df["frac_glu"].dropna()
         print(f"  Kept Ala fraction:       {ala.mean():.4f} +/- {ala.std():.4f}")
         print(f"  Kept Glu fraction:       {glu.mean():.4f} +/- {glu.std():.4f}")
-        drmsd_vals = kept_df["max_drmsd"].dropna()
-        if len(drmsd_vals):
-            print(f"  Kept max DRMSD:          {drmsd_vals.mean():.3f} +/- {drmsd_vals.std():.3f} A")
+        rmsd_vals = kept_df["rmsd_vs_original"].dropna()
+        if len(rmsd_vals):
+            print(f"  Kept RMSD vs original:   {rmsd_vals.mean():.3f} +/- {rmsd_vals.std():.3f} A")
     print(f"  Kept list written to:    {kept_list_path}")
     print("=" * 70 + "\n")
 
@@ -377,7 +378,7 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
                       "#adb5bd", "#2a9d8f", figures_dir)
     plot_before_after(df, "frac_glu", "Glutamate Fraction",
                       "#adb5bd", "#e9c46a", figures_dir)
-    plot_before_after(df, "max_drmsd", "Max Intra-Protein DRMSD (A)",
+    plot_before_after(df, "rmsd_vs_original", r"C$\alpha$ RMSD vs Original ($\AA$)",
                       "#adb5bd", "#264653", figures_dir)
 
     # Chi angle KDE: before vs after
@@ -525,9 +526,14 @@ def main():
                         help="Ensemble dir (default: <data-dir>/ai-cath_backrub_subset_ensembles)")
     parser.add_argument("--output-dir", type=str, required=True,
                         help="Dir for filtered results and plots")
+    parser.add_argument("--originals-dir", type=str, default=None,
+                        help="Dir with original PDBs (e.g. 1jvbA02.pdb) for RMSD comparison")
     parser.add_argument("--score-min", type=float, default=-1200)
     parser.add_argument("--score-max", type=float, default=-0)
-    parser.add_argument("--drmsd-max", type=float, default=10.0)
+    parser.add_argument("--rmsd-max", type=float, default=2.0,
+                        help="Max Kabsch RMSD vs original in Angstroms (default: 2.0)")
+    parser.add_argument("--drmsd-max", type=float, default=10.0,
+                        help="Max DRMSD for ensemble mode (default: 10.0)")
     parser.add_argument("--skip-chi", action="store_true", help="Skip chi angle KDE plots")
     args = parser.parse_args()
 
@@ -538,7 +544,8 @@ def main():
 
     if args.pdb_list:
         run_pdb_list_mode(args.pdb_list, output_dir, figures_dir,
-                          args.score_min, args.score_max, args.drmsd_max, args.skip_chi)
+                          args.score_min, args.score_max, args.rmsd_max,
+                          args.originals_dir, args.skip_chi)
     else:
         data_dir = Path(args.data_dir)
         ensemble_dir = Path(args.ensemble_dir) if args.ensemble_dir else data_dir / "ai-cath_backrub_subset_ensembles"
