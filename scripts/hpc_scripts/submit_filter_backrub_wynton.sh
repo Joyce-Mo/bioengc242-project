@@ -6,12 +6,12 @@
 #$ -l mem_free=16G
 #$ -o logs/filter_ai-cath_$JOB_ID_04142026.out
 #$ -e logs/filter_ai-cath_$JOB_ID_04142026.err
-#$ -m b,e
+#$ -m bea
 #$ -M jqmo@berkeley.edu
 
 source activate mcsce
 
-# ── Mode selection 
+#  Mode selection 
 # Set MODE=pdb_list to validate the flat training dataset (pre-backrub).
 # Set MODE=ensemble to filter backrub conformers vs originals (post-backrub).
 MODE="${MODE:-pdb_list}"
