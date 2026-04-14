@@ -1,16 +1,16 @@
 #!/bin/bash
 #SBATCH -A ucb368
-#SBATCH --job-name=sweep_vae
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
 #SBATCH --gpus=a100:1
 #SBATCH --mem=32G
-#SBATCH --time=12:00:00
+#SBATCH --time=08:00:00
+#SBATCH -J sweep_vae
 #SBATCH -o logs/sweep_vae_%j.out
 #SBATCH -e logs/sweep_vae_%j.err
 #SBATCH -p gpu
-#SBATCH --array=0-23
+#SBATCH --array=0-11
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
@@ -47,11 +47,11 @@ if [ "$n_npys" -eq 0 ]; then
 fi
 echo "Found $n_npys feature files in $FEATURE_DIR"
 
-# Sweep grid 
-# 24 configuratioss: 2 z_dim x 2 lr x 2 dropout x 3 regularization combos
+# Sweep grid
+# 12 configs: 2 z_dim x 2 lr x 3 regularization combos (dropout fixed at 0.2)
 Z_DIMS=(32 64)
 LRS=(1e-3 1e-4)
-DROPOUTS=(0.0 0.2)
+DROPOUT=0.2
 # (weight_decay, kl_anneal_epochs, use_batchnorm)
 REG_COMBOS=("0.0 0 false" "1e-4 10 false" "0.0 10 true")
 
@@ -59,15 +59,14 @@ REG_COMBOS=("0.0 0 false" "1e-4 10 false" "0.0 10 true")
 idx=0
 for z in "${Z_DIMS[@]}"; do
 for lr in "${LRS[@]}"; do
-for dp in "${DROPOUTS[@]}"; do
 for reg in "${REG_COMBOS[@]}"; do
     if [ "$idx" -eq "$SLURM_ARRAY_TASK_ID" ]; then
         read -r wd kl_anneal bn <<< "$reg"
-        Z_DIM=$z; LR=$lr; DROPOUT=$dp; WEIGHT_DECAY=$wd
+        Z_DIM=$z; LR=$lr; WEIGHT_DECAY=$wd
         KL_ANNEAL=$kl_anneal; USE_BN=$bn
     fi
     idx=$((idx + 1))
-done; done; done; done
+done; done; done
 
 RUN_NAME="z${Z_DIM}_lr${LR}_dp${DROPOUT}_wd${WEIGHT_DECAY}_kl${KL_ANNEAL}_bn${USE_BN}"
 OUTPUT_DIR="${SWEEP_BASE}/${RUN_NAME}"
