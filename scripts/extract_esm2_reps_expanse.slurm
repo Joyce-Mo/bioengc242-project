@@ -28,7 +28,7 @@ module load gpu/0.15.4
 
 ## paths
 REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
-PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/datasets/cath20-filtered-foldseek"
+PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/cath20-filtered-foldseek"
 OUTPUT_BASE="/expanse/lustre/scratch/jmo/temp_project/esm2_embeddings"
 
 mkdir -p "${OUTPUT_BASE}" 
