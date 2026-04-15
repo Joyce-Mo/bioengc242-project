@@ -36,7 +36,11 @@ mkdir -p "${OUTPUT_BASE}"
 cd "$REPO_ROOT"
 
 ## ---------------- conda env ----------------
+## On Expanse, `module load anaconda3` does not initialize conda for
+## non-interactive shells, so `conda activate` fails. The eval hook
+## runs the equivalent of `conda init bash` inline for this session.
 module load anaconda3
+eval "$(conda shell.bash hook)"
 conda activate esm2
 
 python -c "import esm, torch; print('esm OK'); print('torch', torch.__version__); print('cuda available', torch.cuda.is_available())"
