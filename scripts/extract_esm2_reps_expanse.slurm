@@ -22,27 +22,21 @@ nvidia-smi
 
 ## Load modules
 module purge
+module load cpu/0.15.4
+module load gcc/10.2.0
 module load gpu/0.15.4
-module load gcc/7.2.0
-module load cuda/11.0.2
 
 ## paths
 REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/datasets/cath20-filtered-foldseek"
 OUTPUT_BASE="/expanse/lustre/scratch/jmo/temp_project/esm2_embeddings"
 
-mkdir -p "${OUTPUT_BASE}" logs
+mkdir -p "${OUTPUT_BASE}" 
 
 cd "$REPO_ROOT"
 
 ## ---------------- conda env ----------------
-__conda_setup="$('/expanse/lustre/scratch/jmo/temp_project/miniconda3/bin/conda' shell.bash hook 2>/dev/null)" || true
-if [ -n "${__conda_setup}" ]; then
-    eval "${__conda_setup}"
-else
-    source /expanse/lustre/scratch/jmo/temp_project/miniconda3/etc/profile.d/conda.sh
-fi
-unset __conda_setup
+module load anaconda3
 conda activate esm2
 
 python -c "import esm, torch; print('esm OK'); print('torch', torch.__version__); print('cuda available', torch.cuda.is_available())"
