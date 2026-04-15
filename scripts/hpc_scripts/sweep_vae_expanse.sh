@@ -3,13 +3,13 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
-#SBATCH --gpus=a100:4
-#SBATCH --mem=128G
+#SBATCH --gpus=1
+#SBATCH --mem=40G
 #SBATCH --time=08:00:00
 #SBATCH -J sweep_vae
 #SBATCH -o logs/sweep_vae_%j.out
 #SBATCH -e logs/sweep_vae_%j.err
-#SBATCH -p gpu
+#SBATCH -p gpu-shared
 #SBATCH --array=0-11%2
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all

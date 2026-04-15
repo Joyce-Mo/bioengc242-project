@@ -4,12 +4,12 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
-#SBATCH --gpus=a100:1
-#SBATCH --mem=32G
+#SBATCH --gpus=1
+#SBATCH --mem=40G
 #SBATCH --time=24:00:00
 #SBATCH -o logs/vae_production_%j.out
 #SBATCH -e logs/vae_production_%j.err
-#SBATCH -p gpu
+#SBATCH -p gpu-shared
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 

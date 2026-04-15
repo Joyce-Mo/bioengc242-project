@@ -1,0 +1,63 @@
+#!/bin/bash
+#SBATCH -A ucb368
+#SBATCH -p gpu-shared
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=10
+#SBATCH --gpus=a100:1
+#SBATCH --mem=64G
+#SBATCH --time=06:00:00
+#SBATCH -J esm2_reps
+#SBATCH -o logs/esm2_reps_%j.out
+#SBATCH -e logs/esm2_reps_%j.err
+#SBATCH --mail-user=jqmo@berkeley.edu
+#SBATCH --mail-type=all
+
+set -euo pipefail
+export PYTHONUNBUFFERED=1
+
+date
+hostname
+nvidia-smi
+
+## Load modules
+module purge
+module load gpu/0.15.4
+module load gcc/7.2.0
+module load cuda/11.0.2
+
+## paths
+REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
+PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/datasets/cath20-filtered-foldseek"
+OUTPUT_BASE="/expanse/lustre/scratch/jmo/temp_project/esm2_embeddings"
+
+mkdir -p "${OUTPUT_BASE}" logs
+
+cd "$REPO_ROOT"
+
+## ---------------- conda env ----------------
+__conda_setup="$('/expanse/lustre/scratch/jmo/temp_project/miniconda3/bin/conda' shell.bash hook 2>/dev/null)" || true
+if [ -n "${__conda_setup}" ]; then
+    eval "${__conda_setup}"
+else
+    source /expanse/lustre/scratch/jmo/temp_project/miniconda3/etc/profile.d/conda.sh
+fi
+unset __conda_setup
+conda activate esm2
+
+python -c "import esm, torch; print('esm OK'); print('torch', torch.__version__); print('cuda available', torch.cuda.is_available())"
+
+## ---------------- run ESM-2 ----------------
+echo "==================== ESM-2 reps ===================="
+python "${REPO_ROOT}/scripts/extract_esm2_reps.py" \
+    --pdb_dir "${PDB_DIR}" \
+    --save_dir "${OUTPUT_BASE}" \
+    --model_name esm2_t36_3B_UR50D \
+    --device cuda
+
+## ---------------- end-of-job ----------------
+date
+echo "Job $SLURM_JOB_ID complete."
+if command -v sacct >/dev/null 2>&1; then
+    sacct -j "$SLURM_JOB_ID" --format=JobID,Elapsed,MaxRSS,MaxVMSize,State || true
+fi
