@@ -19,7 +19,7 @@ import argparse
 import glob
 import os
 import warnings
-from collections import defaultdictth
+from collections import defaultdict
 from pathlib import Path
 
 import matplotlib.pyplot as plt

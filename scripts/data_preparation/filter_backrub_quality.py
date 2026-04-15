@@ -381,9 +381,9 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
     plot_before_after(df, "rmsd_vs_original", r"C$\alpha$ RMSD vs Original ($\AA$)",
                       "#adb5bd", "#264653", figures_dir)
 
-    # Chi angle KDE: before vs after
+    # Chi angle KDE: OG Ingraham originals vs augmented (before/after filter)
     if not skip_chi:
-        logger.info("Generating chi angle KDE plots (before vs after)...")
+        logger.info("Generating chi angle KDE plots...")
         from collections import defaultdict
         from plot_chi_angle_kde import extract_chi_angles_from_pdb
 
@@ -395,9 +395,24 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
                     all_angles[key].extend(vals)
             return {k: np.array(v) for k, v in all_angles.items()}
 
-        before_chi = extract_from_paths(pdb_paths)
-        after_chi = extract_from_paths([Path(p) for p in kept_df["pdb_path"].tolist()])
-        chi_data = {"Before filter": before_chi, "After filter": after_chi}
+        chi_data = {}
+
+        # OG Ingraham CATH originals
+        if originals_dir is not None:
+            og_dir = Path(originals_dir)
+            og_pdbs = sorted(og_dir.glob("*.pdb"))[:2000]
+            if og_pdbs:
+                logger.info("  Extracting chi angles from %d OG Ingraham originals...", len(og_pdbs))
+                chi_data["OG Ingraham CATH"] = extract_from_paths(og_pdbs)
+
+        # Augmented dataset (before filter)
+        logger.info("  Extracting chi angles from augmented dataset (before filter)...")
+        chi_data["Augmented (before)"] = extract_from_paths(pdb_paths)
+
+        # After filter
+        logger.info("  Extracting chi angles from augmented dataset (after filter)...")
+        chi_data["Augmented (after)"] = extract_from_paths(
+            [Path(p) for p in kept_df["pdb_path"].tolist()])
 
         for resname in AA_WITH_CHI:
             out_path = str(figures_dir / f"chi_angles_{resname}.png")
