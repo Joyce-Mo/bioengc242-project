@@ -3,21 +3,23 @@
 
 Reproduces the rotamer analysis from La-Proteina (Appendix D.3.2):
 KDE plots for all side-chain angles of all amino acids, comparing
-multiple methods and reference datasets.
+generated structures against a reference PDB dataset (e.g., CATH-20).
 
 Usage:
     python scripts/plot_chi_angle_kde.py \
-        --input_dirs Protpardelle=/path/to/pdbs AFDB=/path/to/pdbs PDB=/path/to/pdbs \
+        --input_dirs "Protpardelle=/path/to/generated" "CATH-20=/path/to/cath" \
         --output_dir outputs/chi_angle_plots
 
 Each --input_dirs entry is NAME=PATH where PATH contains .pdb files.
+The reference dataset should be experimental structures (e.g., Ingraham CATH
+or a filtered PDB subset), NOT MPNN/ESMFold-generated structures.
 """
 
 import argparse
 import glob
 import os
 import warnings
-from collections import defaultdict
+from collections import defaultdictth
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -25,8 +27,10 @@ import numpy as np
 from Bio.PDB import PDBParser
 from scipy.stats import gaussian_kde
 
-# ── Chi angle definitions (from residue_constants.py) ──────────────────────
-# Format: residue 3-letter code → list of (chi_name, [atom1, atom2, atom3, atom4])
+# Chi angle definitions 
+# Format: residue 3-letter code -> list of (chi_name, [atom1, atom2, atom3, atom4])
+# based on alphafold: 
+# https://github.com/google-deepmind/alphafold/blob/main/alphafold/common/residue_constants.py
 CHI_ANGLES = {
     "ARG": [
         ("chi1", ["N", "CA", "CB", "CG"]),
@@ -97,10 +101,59 @@ CHI_ANGLES = {
     "VAL": [("chi1", ["N", "CA", "CB", "CG1"])],
 }
 
-# Amino acids with chi angles, sorted alphabetically
 AA_WITH_CHI = sorted(CHI_ANGLES.keys())
 
-# ── Geometry ───────────────────────────────────────────────────────────────
+# Reference dataset names — these get solid black lines and are plotted first.
+# Any input name containing one of these substrings (case-insensitive) is treated as reference.
+REFERENCE_KEYWORDS = {"cath", "pdb", "afdb"}
+
+_MODEL_COLORS = [
+    "#5B8DB8",  # steel blue
+    "#E07B54",  # warm coral
+    "#B07AA1",  # muted purple
+    "#F2C14E",  # golden yellow
+    "#76B7B2",  # teal
+    "#E15759",  # rose red
+    "#59A14F",  # forest green
+    "#FF9DA7",  # soft pink
+]
+
+
+def _is_reference(name):
+    """Check if a method name is a reference dataset."""
+    lower = name.lower()
+    return any(kw in lower for kw in REFERENCE_KEYWORDS)
+
+
+def assign_styles(method_names):
+    """Auto-assign colors and linestyles to method names.
+
+    Reference datasets get solid black lines. Generated models get
+    distinct colors with dashed lines. Order: references first, then
+    models in input order.
+
+    Returns:
+        dict: {name: {"color": str, "linestyle": str, "linewidth": float}}
+    """
+    styles = {}
+    model_idx = 0
+    for name in method_names:
+        if _is_reference(name):
+            styles[name] = {
+                "color": "#333333",
+                "linestyle": "-",
+                "linewidth": 2.0,
+            }
+        else:
+            styles[name] = {
+                "color": _MODEL_COLORS[model_idx % len(_MODEL_COLORS)],
+                "linestyle": "--",
+                "linewidth": 1.5,
+            }
+            model_idx += 1
+    return styles
+
+# Geometry
 
 def dihedral_angle(p0, p1, p2, p3):
     """Compute dihedral angle in degrees from four 3D points (numpy arrays)."""
@@ -121,7 +174,7 @@ def dihedral_angle(p0, p1, p2, p3):
     return np.degrees(np.arctan2(-y, x))
 
 
-# ── Extract chi angles from PDB files ──────────────────────────────────────
+# Extract chi angles from PDB files 
 
 def extract_chi_angles_from_pdb(pdb_path):
     """Extract all chi angles from a PDB file.
@@ -173,7 +226,6 @@ def extract_chi_angles_from_dir(pdb_dir, max_files=None):
         glob.glob(os.path.join(pdb_dir, "**/*.pdb"), recursive=True)
     )
     if not pdb_files:
-        # Also try .cif files
         pdb_files = sorted(
             glob.glob(os.path.join(pdb_dir, "**/*.cif"), recursive=True)
         )
@@ -193,37 +245,14 @@ def extract_chi_angles_from_dir(pdb_dir, max_files=None):
     return {k: np.array(v) for k, v in all_angles.items()}
 
 
-# ── Plotting ───────────────────────────────────────────────────────────────
-
-# Color palette matching the La-Proteina paper style
-DEFAULT_COLORS = {
-    "AFDB": "#1f77b4",          # blue
-    "PDB": "#ff7f0e",           # orange
-    "La-Proteina": "#2ca02c",   # green
-    "PAllAtom": "#d62728",      # red
-    "Protpardelle": "#9467bd",  # purple
-    "PLAID": "#8c564b",         # brown
-    "ProteinGenerator": "#e377c2",  # pink
-    "APM": "#7f7f7f",           # gray
-}
-
-DEFAULT_LINESTYLES = {
-    "AFDB": "-",
-    "PDB": "-",
-    "La-Proteina": "-",
-    "PAllAtom": "--",
-    "Protpardelle": "--",
-    "PLAID": "--",
-    "ProteinGenerator": "--",
-    "APM": "--",
-}
-
+# Plotting 
 
 def plot_kde_for_amino_acid(
     resname,
     all_data,
     output_path,
-    bw_method=0.5,
+    styles,
+    bw_method=None, # default scott rule n**(-1./(d+4)),
     figsize_per_plot=(6, 3.5),
 ):
     """Plot KDE for all chi angles of one amino acid.
@@ -232,13 +261,13 @@ def plot_kde_for_amino_acid(
         resname: 3-letter amino acid code
         all_data: dict of {method_name: {(resname, chi_name): np.array}}
         output_path: path to save the figure
+        styles: dict from assign_styles()
         bw_method: KDE bandwidth (scalar or string)
         figsize_per_plot: (width, height) per subplot
     """
     chi_defs = CHI_ANGLES[resname]
     n_chi = len(chi_defs)
 
-    # Determine layout: up to 3 per row
     ncols = min(n_chi, 3)
     nrows = (n_chi + ncols - 1) // ncols
     fig, axes = plt.subplots(
@@ -247,26 +276,24 @@ def plot_kde_for_amino_acid(
         squeeze=False,
     )
 
-    x_grid = np.linspace(-180, 180, 500)
-
     for idx, (chi_name, _) in enumerate(chi_defs):
         row, col = divmod(idx, ncols)
         ax = axes[row][col]
         key = (resname, chi_name)
 
-        # Determine x range: most chi angles are -180 to 180
-        # ARG chi5 is narrow (-20 to 20) but we don't include chi5
         chi_num = int(chi_name.replace("chi", ""))
         x_min, x_max = -180, 180
         x_plot = np.linspace(x_min, x_max, 500)
 
-        for method_name, method_data in all_data.items():
+        # Plot references first, then generated models
+        plot_order = sorted(all_data.keys(), key=lambda n: (not _is_reference(n), n))
+        for method_name in plot_order:
+            method_data = all_data[method_name]
             if key not in method_data or len(method_data[key]) < 10:
                 continue
 
             angles = method_data[key]
-            color = DEFAULT_COLORS.get(method_name, None)
-            ls = DEFAULT_LINESTYLES.get(method_name, "-")
+            s = styles[method_name]
 
             try:
                 kde = gaussian_kde(angles, bw_method=bw_method)
@@ -274,28 +301,25 @@ def plot_kde_for_amino_acid(
                 ax.plot(
                     x_plot, density,
                     label=method_name,
-                    color=color,
-                    linestyle=ls,
-                    linewidth=1.5,
+                    color=s["color"],
+                    linestyle=s["linestyle"],
+                    linewidth=s["linewidth"],
                     alpha=0.85,
                 )
             except Exception:
                 continue
 
-        # Greek letter for chi
-        chi_label = f"χ{chi_num}"
+        chi_label = f"\u03c7{chi_num}"
         ax.set_xlabel(f"{resname} {chi_label} Angle (degrees)", fontsize=10)
         ax.set_ylabel("Density", fontsize=10)
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(bottom=0)
         ax.tick_params(labelsize=9)
 
-    # Remove empty subplots
     for idx in range(n_chi, nrows * ncols):
         row, col = divmod(idx, ncols)
         axes[row][col].set_visible(False)
 
-    # Single legend for the figure
     handles, labels = axes[0][0].get_legend_handles_labels()
     if handles:
         fig.legend(
@@ -327,7 +351,7 @@ def main():
         "--input_dirs",
         nargs="+",
         required=True,
-        help="NAME=PATH pairs, e.g. Protpardelle=/path/to/pdbs AFDB=/path/to/pdbs",
+        help="NAME=PATH pairs, e.g. Protpardelle=/path/to/pdbs CATH-20=/path/to/cath",
     )
     parser.add_argument(
         "--output_dir",
@@ -344,8 +368,8 @@ def main():
     parser.add_argument(
         "--bw_method",
         type=float,
-        default=0.5,
-        help="KDE bandwidth parameter (default: 0.5)",
+        default=None,
+        help="KDE bandwidth parameter (default: scipy Scott's rule)",
     )
     parser.add_argument(
         "--amino_acids",
@@ -385,6 +409,13 @@ def main():
     # Determine which amino acids to plot
     aa_list = args.amino_acids if args.amino_acids else AA_WITH_CHI
 
+    # Auto-assign colors and linestyles
+    styles = assign_styles(list(all_data.keys()))
+    print("\nStyle assignments:")
+    for name, s in styles.items():
+        role = "reference" if _is_reference(name) else "model"
+        print(f"  {name} ({role}): {s['color']}, {s['linestyle']}")
+
     # Generate plots
     print("\nGenerating KDE plots...")
     for resname in aa_list:
@@ -395,7 +426,7 @@ def main():
             args.output_dir, f"chi_angles_{resname}.{args.format}"
         )
         plot_kde_for_amino_acid(
-            resname, all_data, output_path, bw_method=args.bw_method
+            resname, all_data, output_path, styles, bw_method=args.bw_method
         )
 
     print(f"\nDone! Plots saved to {args.output_dir}/")
