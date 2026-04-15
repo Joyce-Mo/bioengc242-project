@@ -19,7 +19,7 @@ MODE="${MODE:-pdb_list}"
 if [ "$MODE" = "pdb_list" ]; then
     # Validate the ai-cath training PDB dataset
     PDB_LIST="ai-cath_training_pdb.txt"
-    ORIGINALS_DIR="/wynton/scratch/jqmo/rotation_datasets/OG_ingraham_cath"
+    ORIGINALS_DIR="/wynton/scratch/jqmo/rotation_datasets/OG_ingraham_cath/dompdb"
     OUTPUT_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_training_filtered"
 
     python scripts/data_preparation/filter_backrub_quality.py \
