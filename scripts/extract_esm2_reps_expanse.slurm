@@ -4,9 +4,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
-#SBATCH --gpus=a100:1
+#SBATCH --gpus=4
 #SBATCH --mem=64G
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00
 #SBATCH -J esm2_reps
 #SBATCH -o logs/esm2_reps_%j.out
 #SBATCH -e logs/esm2_reps_%j.err
