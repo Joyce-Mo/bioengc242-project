@@ -8,8 +8,8 @@
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
 #SBATCH -J esm2_reps
-#SBATCH -o logs/esm2_reps_%j.out
-#SBATCH -e logs/esm2_reps_%j.err
+#SBATCH -o logs/esm2_reps_04152026_%j.out
+#SBATCH -e logs/esm2_reps_04152026_%j.err
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
