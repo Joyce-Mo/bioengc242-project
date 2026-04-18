@@ -1,22 +1,30 @@
 #!/usr/bin/env python
-"""Filter PDB datasets by Rosetta score, sequence gaps, and (optionally) DRMSD.
+"""Filter PDB datasets by minimized Rosetta score, sequence gaps, repeat residues, and RMSD.
 
 Two modes:
-  --pdb-list FILE   Filter a flat list of PDBs (score + gap checks only).
+  --pdb-list FILE   Filter a flat list of PDBs (minimize+score, gap, repeat, RMSD checks).
                     Writes kept paths to <output-dir>/kept_pdb_list.txt.
-  --data-dir DIR    Filter backrub ensembles vs originals (score + gap + DRMSD).
+  --data-dir DIR    Filter backrub ensembles vs originals (minimize+score, gap, DRMSD).
 
 Criteria:
-  1. Rosetta score > 0 or outside [score-min, score-max] -> remove
+  1. Consecutive repeat residues >= 5 of the same amino acid in a row -> remove
   2. Sequence gaps in residue numbering -> remove
-  3. DRMSD > drmsd-max vs original -> remove (ensemble mode only)
+  3. Rosetta score after minimization > 0 -> remove (lower energy is always better).
+     Minimization protocol follows run_backrub.py: idealize, repack, flip_HNQ,
+     L-BFGS min chi, L-BFGS min chi+bb (Smith & Kortemme 2008).
+  4. Kabsch RMSD > rmsd-max (default 3.0 A) vs original -> remove (pdb-list mode)
+     DRMSD > drmsd-max vs original -> remove (ensemble mode)
 
-Outputs filter_results.csv and before/after comparison plots.
+Note that the original ingraham cath dataset is in:
+/wynton/scratch/jqmo/rotation_datasets/OG_ingraham_cath/dompdb
+
+Outputs filter_results.csv and before/after comparison plots (including RMSD).
 
 Usage:
     # Filter a flat PDB list (pre-backrub dataset validation)
     python scripts/data_preparation/filter_backrub_quality.py \
-        --pdb-list ai-cath_training_pdb.txt --output-dir /path/to/filtered
+        --pdb-list ai-cath_training_pdb.txt --output-dir /path/to/filtered \
+        --originals-dir /path/to/OG_ingraham_cath/dompdb
 
     # Filter backrub ensembles
     python scripts/data_preparation/filter_backrub_quality.py \
@@ -40,6 +48,7 @@ from Bio.PDB import PDBParser
 # Reuse existing functions
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from rmsd_backrub_vs_original import get_ca_atoms, compute_rmsd_kabsch, compute_drmsd
+from run_backrub import preprocess_pose
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "evaluation"))
 from plot_chi_angle_kde import extract_chi_angles_from_dir, plot_kde_for_amino_acid, AA_WITH_CHI
@@ -81,23 +90,52 @@ def score_pdb(pdb_path, scorefxn):
         return None
 
 
+def minimize_and_score_pdb(pdb_path, scorefxn):
+    """Minimize a PDB using the shared preprocessing from run_backrub.py, then score.
+
+    Calls preprocess_pose() which applies: idealize, repack, flip_HNQ,
+    L-BFGS min chi, L-BFGS min chi+bb (Smith & Kortemme 2008/2010).
+
+    Returns the minimized Rosetta energy score (REU), or None on failure.
+    """
+    import pyrosetta
+
+    try:
+        pose = pyrosetta.pose_from_pdb(str(pdb_path))
+    except Exception as e:
+        logger.warning("Load failed for %s: %s", pdb_path, e)
+        return None
+
+    try:
+        return preprocess_pose(pose, scorefxn)
+    except Exception as e:
+        logger.warning("Minimize+score failed for %s: %s", pdb_path, e)
+        return None
+
+
 # Sequence gap detection 
 
-def has_sequence_gaps(pdb_path):
-    """Check for gaps in residue numbering (missing residues)."""
+def max_sequence_gap(pdb_path):
+    """Return the largest gap in residue numbering, or 0 if contiguous.
+
+    A gap of size N means N-1 residues are missing between two consecutive
+    residue IDs. Returns -1 if the structure cannot be parsed.
+    """
     parser = PDBParser(QUIET=True)
     try:
         structure = parser.get_structure(pdb_path.stem, str(pdb_path))
     except Exception:
-        return True
+        return -1
+    largest = 0
     for model in structure:
         for chain in model:
             res_ids = [res.id[1] for res in chain if res.id[0] == " "]
             for i in range(1, len(res_ids)):
-                if res_ids[i] - res_ids[i - 1] > 1:
-                    return True
+                gap = res_ids[i] - res_ids[i - 1]
+                if gap > largest:
+                    largest = gap
         break
-    return False
+    return largest
 
 
 # Sequence identity 
@@ -122,19 +160,24 @@ def sequence_identity(seq1, seq2):
     return sum(a == b for a, b in zip(seq1[:min_len], seq2[:min_len])) / min_len
 
 
-def has_repeat_residues(seq, min_run=3):
-    """Check if sequence has any run of >= min_run identical residues."""
-    if len(seq) < min_run:
-        return False
+def longest_repeat_run(seq):
+    """Return the length of the longest run of consecutive identical residues.
+
+    For example, 'AAALLEEE' has longest run 3 (AAA or EEE).
+    Returns 0 for empty sequences, 1 for sequences with no repeats.
+    """
+    if len(seq) == 0:
+        return 0
+    max_run = 1
     count = 1
     for i in range(1, len(seq)):
         if seq[i] == seq[i - 1]:
             count += 1
-            if count >= min_run:
-                return True
+            if count > max_run:
+                max_run = count
         else:
             count = 1
-    return False
+    return max_run
 
 
 def aa_fractions(seq):
@@ -237,8 +280,8 @@ def plot_before_after(df, col, label, color_before, color_after, figures_dir):
 # ── PDB-list mode (flat list, no ensemble comparison) ─────────────────────────
 
 def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
-                      score_min, score_max, rmsd_max, originals_dir, skip_chi):
-    """Filter a flat PDB list by Rosetta score, gaps, repeats, and RMSD vs original."""
+                      rmsd_max, originals_dir, skip_chi):
+    """Filter a flat PDB list by minimized Rosetta score (>0 removed), gaps, repeats, and RMSD."""
     with open(pdb_list_path) as f:
         pdb_paths = [Path(line.strip()) for line in f if line.strip()]
     logger.info("Loaded %d PDB paths from %s", len(pdb_paths), pdb_list_path)
@@ -260,7 +303,7 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
         rec = {"pdb": pdb_path.name, "pdb_path": str(pdb_path),
                "protein": stem, "kept": False,
                "removal_reason": None, "rosetta_score": None, "n_residues": None,
-               "has_gap": None, "has_repeats": None,
+               "max_gap": None, "max_repeat_run": None,
                "frac_ala": None, "frac_glu": None, "rmsd_vs_original": None}
 
         rec["n_residues"] = count_residues(pdb_path)
@@ -275,34 +318,37 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
         rec["frac_ala"] = frac_a
         rec["frac_glu"] = frac_e
 
-        # Repeat residue check
-        repeats = has_repeat_residues(seq, min_run=3)
-        rec["has_repeats"] = repeats
-        if repeats:
-            score = score_pdb(pdb_path, scorefxn)
+        # Repeat residue check: flag proteins with >= 5 consecutive identical residues
+        run_len = longest_repeat_run(seq)
+        rec["max_repeat_run"] = run_len
+        if run_len >= 5:
+            score = minimize_and_score_pdb(pdb_path, scorefxn)
             rec["rosetta_score"] = score
             rec["removal_reason"] = "repeat_residues"
             records.append(rec)
             continue
 
-        # Gap check
-        gap = has_sequence_gaps(pdb_path)
-        rec["has_gap"] = gap
-        if gap:
-            score = score_pdb(pdb_path, scorefxn)
+        # Gap check: flag proteins with any gap > 1 in residue numbering
+        gap = max_sequence_gap(pdb_path)
+        rec["max_gap"] = gap
+        if gap > 1:
+            score = minimize_and_score_pdb(pdb_path, scorefxn)
             rec["rosetta_score"] = score
             rec["removal_reason"] = "sequence_gap"
             records.append(rec)
             continue
 
-        # Rosetta score
-        score = score_pdb(pdb_path, scorefxn)
+        # Rosetta score (minimize first, then filter on minimized energy)
+        # Minimization follows run_backrub.py protocol: idealize, repack,
+        # flip_HNQ, min chi, min chi+bb. See Smith & Kortemme (2008).
+        score = minimize_and_score_pdb(pdb_path, scorefxn)
         rec["rosetta_score"] = score
         if score is None:
             rec["removal_reason"] = "score_failed"
             records.append(rec)
             continue
-        if score > 0 or score < score_min or score > score_max:
+        # Only reject positive scores (unstable/unphysical). Lower scores are always better.
+        if score > 0:
             rec["removal_reason"] = "score"
             records.append(rec)
             continue
@@ -353,6 +399,16 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
         print(f"  Removal breakdown:")
         for reason, n in removed["removal_reason"].value_counts().items():
             print(f"    {reason}: {n}")
+    # Report fraction of ALL input PDBs with high Ala or Glu content
+    all_ala = df["frac_ala"].dropna()
+    all_glu = df["frac_glu"].dropna()
+    if len(all_ala):
+        n_ala_high = (all_ala > 0.20).sum()
+        print(f"  Input Ala > 20%:         {n_ala_high}/{len(all_ala)} ({n_ala_high/len(all_ala)*100:.1f}%)")
+    if len(all_glu):
+        n_glu_high = (all_glu > 0.20).sum()
+        print(f"  Input Glu > 20%:         {n_glu_high}/{len(all_glu)} ({n_glu_high/len(all_glu)*100:.1f}%)")
+
     if len(kept_df):
         scores = kept_df["rosetta_score"].dropna()
         print(f"  Kept score range:        [{scores.min():.1f}, {scores.max():.1f}]")
@@ -425,8 +481,8 @@ def run_pdb_list_mode(pdb_list_path, output_dir, figures_dir,
 # ── Ensemble mode (backrub conformers vs originals) ──────────────────────────
 
 def run_ensemble_mode(data_dir, ensemble_dir, output_dir, figures_dir,
-                      score_min, score_max, drmsd_max, skip_chi):
-    """Filter backrub ensembles by score, gaps, and DRMSD."""
+                      drmsd_max, skip_chi):
+    """Filter backrub ensembles by minimized score (>0 removed), gaps, and DRMSD."""
     orig_dir = data_dir / "originals"
 
     for d, name in [(orig_dir, "originals"), (ensemble_dir, "ensembles")]:
@@ -453,16 +509,21 @@ def run_ensemble_mode(data_dir, ensemble_dir, output_dir, figures_dir,
         for conf_pdb in sorted(conf_dir.glob("*.pdb")):
             rec = {"protein": stem, "conformer": conf_pdb.name, "kept": False,
                    "removal_reason": None, "rosetta_score": None,
+                   "max_gap": None,
                    "drmsd": None, "rmsd": None, "seq_identity": None, "n_residues": None}
 
-            if has_sequence_gaps(conf_pdb):
+            gap = max_sequence_gap(conf_pdb)
+            rec["max_gap"] = gap
+            if gap > 1:
                 rec["removal_reason"] = "sequence_gap"
                 records.append(rec)
                 continue
 
-            score = score_pdb(conf_pdb, scorefxn)
+            # Minimize before scoring (same protocol as run_backrub.py)
+            score = minimize_and_score_pdb(conf_pdb, scorefxn)
             rec["rosetta_score"] = score
-            if score is None or score > 0 or score < score_min or score > score_max:
+            # Only reject positive scores (unstable/unphysical). Lower is always better.
+            if score is None or score > 0:
                 rec["removal_reason"] = "score"
                 records.append(rec)
                 continue
@@ -543,10 +604,8 @@ def main():
                         help="Dir for filtered results and plots")
     parser.add_argument("--originals-dir", type=str, default=None,
                         help="Dir with original PDBs (e.g. 1jvbA02.pdb) for RMSD comparison")
-    parser.add_argument("--score-min", type=float, default=-1200)
-    parser.add_argument("--score-max", type=float, default=-0)
-    parser.add_argument("--rmsd-max", type=float, default=2.0,
-                        help="Max Kabsch RMSD vs original in Angstroms (default: 2.0)")
+    parser.add_argument("--rmsd-max", type=float, default=3.0,
+                        help="Max Kabsch RMSD vs original in Angstroms (default: 3.0)")
     parser.add_argument("--drmsd-max", type=float, default=10.0,
                         help="Max DRMSD for ensemble mode (default: 10.0)")
     parser.add_argument("--skip-chi", action="store_true", help="Skip chi angle KDE plots")
@@ -559,13 +618,12 @@ def main():
 
     if args.pdb_list:
         run_pdb_list_mode(args.pdb_list, output_dir, figures_dir,
-                          args.score_min, args.score_max, args.rmsd_max,
-                          args.originals_dir, args.skip_chi)
+                          args.rmsd_max, args.originals_dir, args.skip_chi)
     else:
         data_dir = Path(args.data_dir)
         ensemble_dir = Path(args.ensemble_dir) if args.ensemble_dir else data_dir / "ai-cath_backrub_subset_ensembles"
         run_ensemble_mode(data_dir, ensemble_dir, output_dir, figures_dir,
-                          args.score_min, args.score_max, args.drmsd_max, args.skip_chi)
+                          args.drmsd_max, args.skip_chi)
 
 
 if __name__ == "__main__":

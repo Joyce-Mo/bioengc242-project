@@ -22,6 +22,8 @@ source activate mcsce-precompute
 # otherwise edit MCSCE_PRECOMPUTE_DIR at the top of run_mcsce.py.
 export MCSCE_PRECOMPUTE_DIR="/wynton/home/rotation/jqmo/rotation3/mcsce-precompute"
 
+# /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold 
+
 PDB_LIST="pdb_list_ai-cath_subset.txt"
 OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
 NCONFS=100

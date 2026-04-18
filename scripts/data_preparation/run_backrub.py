@@ -42,24 +42,104 @@ def get_pdb_path(args):
     sys.exit(1)
 
 
+def preprocess_pose(pose, scorefxn):
+    """Preprocess a pose: idealize, repack, and two-stage minimize.
+
+    Shared preprocessing protocol used before backrub sampling and for
+    energy-based quality filtering. Modifies the pose in place.
+
+    Protocol (adapted from Smith & Kortemme 2008/2010):
+      1. Idealize bond geometries (IdealizeMover, Engh & Huber values)
+      2. Repack side chains (PackRotamersMover with RestrictToRepacking + IncludeCurrent)
+      3. Enable flip_HNQ for His/Asn/Gln sidechain flips during minimization
+      4. L-BFGS minimize chi angles only
+      5. L-BFGS minimize chi + backbone
+      6. Disable flip_HNQ
+
+    Args:
+        pose: PyRosetta Pose object to preprocess.
+        scorefxn: Rosetta ScoreFunction (beta_nov16).
+
+    Returns:
+        The minimized score (REU).
+    """
+    from pyrosetta.rosetta.protocols.minimization_packing import (
+        MinMover, PackRotamersMover,
+    )
+    from pyrosetta.rosetta.core.kinematics import MoveMap
+    from pyrosetta.rosetta.core.pack.task import TaskFactory
+    from pyrosetta.rosetta.core.pack.task.operation import (
+        RestrictToRepacking, IncludeCurrent,
+    )
+    from pyrosetta.rosetta.protocols.idealize import IdealizeMover
+    from pyrosetta.rosetta.basic.options import set_boolean_option
+
+    # 1. Idealize bond geometries before repacking
+    idealize = IdealizeMover()
+    idealize.apply(pose)
+    logger.info(f"Post-idealize score: {scorefxn(pose):.1f}")
+
+    # 2. Repack side chains before minimization
+    tf = TaskFactory()
+    tf.push_back(RestrictToRepacking())
+    tf.push_back(IncludeCurrent())
+    packer = PackRotamersMover()
+    packer.score_function(scorefxn)
+    packer.task_factory(tf)
+    packer.apply(pose)
+    logger.info(f"Post-repack score: {scorefxn(pose):.1f}")
+
+    # 3. Enable flip_HNQ for minimization (Dru suggestion)
+    set_boolean_option("packing:flip_HNQ", True)
+
+    # 4. Minimize side chains only
+    mm_chi = MoveMap()
+    mm_chi.set_bb(False)
+    mm_chi.set_chi(True)
+    min_chi = MinMover()
+    min_chi.movemap(mm_chi)
+    min_chi.score_function(scorefxn)
+    min_chi.min_type("lbfgs_armijo_nonmonotone")
+    min_chi.tolerance(0.01)
+    min_chi.apply(pose)
+    logger.info(f"Post-minimize (chi only): {scorefxn(pose):.1f}")
+
+    # 5. Minimize side chains + backbone
+    mm_all = MoveMap()
+    mm_all.set_bb(True)
+    mm_all.set_chi(True)
+    min_all = MinMover()
+    min_all.movemap(mm_all)
+    min_all.score_function(scorefxn)
+    min_all.min_type("lbfgs_armijo_nonmonotone")
+    min_all.tolerance(0.01)
+    min_all.apply(pose)
+    logger.info(f"Post-minimize (chi+bb): {scorefxn(pose):.1f}")
+
+    # 6. Disable flip_HNQ for subsequent steps
+    set_boolean_option("packing:flip_HNQ", False)
+
+    return scorefxn(pose)
+
+
 def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
                 repack=False, trajectory_stride=100):
     """Run Backrub on a single PDB following Smith & Kortemme (2010) paper's methods
 
-    
+
     Overview of Protocol from Smith & Kortemme (2010) paper:
       1. Repack all side chains via MC simulated annealing
       2. Two-stage minimization: (a) side chains only, (b) side chains + backbone
       3. Backrub MC with 75% backbone / 25% sidechain moves, Dunbrack rotamers,
          10% uniform chi sampling. Retains lowest-scoring structure per trajectory.
       4. Post-backrub two-stage minimization on each conformer
-     
+
        Although note that I did update protocol for...
     - newer score function
-    - minimization of side chain, separately, followed by side chain + bacbone (instead of 
+    - minimization of side chain, separately, followed by side chain + bacbone (instead of
     some random backbone residues near mutations of the PDZ that Kortemme paper was looking at)
     - idealization of bond geometries during repacking step
-    - explicitly flip_HNQ during minimization but not during backrub sampling 
+    - explicitly flip_HNQ during minimization but not during backrub sampling
 
 
     """
@@ -89,32 +169,10 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     initial_score = scorefxn(pose)
     logger.info(f"  Initial score: {initial_score:.1f}")
 
-    from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
-    from pyrosetta.rosetta.core.pack.task import TaskFactory
-    from pyrosetta.rosetta.core.pack.task.operation import RestrictToRepacking, IncludeCurrent
-    from pyrosetta.rosetta.protocols.idealize import IdealizeMover
-    from pyrosetta.rosetta.basic.options import set_boolean_option
+    # Shared preprocessing: idealize, repack, two-stage minimize
+    preprocess_pose(pose, scorefxn)
 
-    # Idealize bond geometries before repacking
-    idealize = IdealizeMover()
-    idealize.apply(pose)
-    logger.info(f"Post-idealize score: {scorefxn(pose):.1f}")
-
-    # Repack side chains before minimization and backrub sampling
-    tf = TaskFactory()
-    tf.push_back(RestrictToRepacking())
-    tf.push_back(IncludeCurrent())
-    packer = PackRotamersMover()
-    packer.score_function(scorefxn)
-    packer.task_factory(tf)
-    packer.apply(pose)
-    logger.info(f"Post-repack score: {scorefxn(pose):.1f}")
-
-    # Enable flip_HNQ for minimization (Dru suggestion)
-    set_boolean_option("packing:flip_HNQ", True)
-
-    print("begin minimization")
-    # Step 1: Minimize side chains only
+    # Set up minimization movers for post-backrub minimization of each conformer
     mm_chi = MoveMap()
     mm_chi.set_bb(False)
     mm_chi.set_chi(True)
@@ -123,10 +181,7 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_chi.score_function(scorefxn)
     min_chi.min_type("lbfgs_armijo_nonmonotone")
     min_chi.tolerance(0.01)
-    min_chi.apply(pose)
-    logger.info(f"Post-minimize (chi only): {scorefxn(pose):.1f}")
 
-    # Stage 2: Minimize side chains + backbone
     mm_all = MoveMap()
     mm_all.set_bb(True)
     mm_all.set_chi(True)
@@ -135,11 +190,6 @@ def run_backrub(pdb_path, outdir, n_conformers, n_mc_steps, kT, max_angle, seed,
     min_all.score_function(scorefxn)
     min_all.min_type("lbfgs_armijo_nonmonotone")
     min_all.tolerance(0.01)
-    min_all.apply(pose)
-    logger.info(f"  Post-minimize (chi+bb): {scorefxn(pose):.1f}")
-
-    # Disable flip_HNQ for backrub sampling and remainder
-    set_boolean_option("packing:flip_HNQ", False)
 
     # Backrub MC sampling
     # Smith & Kortemme (2010): backbone backrub moves, retain lowest-scoring.

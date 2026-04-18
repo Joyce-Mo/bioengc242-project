@@ -2,10 +2,10 @@
 #$ -S /bin/bash
 #$ -N filter_ai-cath
 #$ -cwd
-#$ -l h_rt=48:00:00
+#$ -l h_rt=52:00:00
 #$ -l mem_free=16G
-#$ -o logs/filter_ai-cath_$JOB_ID_04142026.out
-#$ -e logs/filter_ai-cath_$JOB_ID_04142026.err
+#$ -o logs/filter_ai-cath_04172026_$JOB_ID.out
+#$ -e logs/filter_ai-cath_04172026_$JOB_ID.err
 #$ -m bea
 #$ -M jqmo@berkeley.edu
 
@@ -26,9 +26,7 @@ if [ "$MODE" = "pdb_list" ]; then
         --pdb-list "$PDB_LIST" \
         --originals-dir "$ORIGINALS_DIR" \
         --output-dir "$OUTPUT_DIR" \
-        --score-min -1200 \
-        --score-max -0 \
-        --rmsd-max 2.0
+        --rmsd-max 3.0
 
 elif [ "$MODE" = "ensemble" ]; then
     # Filter backrub ensembles vs originals
@@ -40,7 +38,5 @@ elif [ "$MODE" = "ensemble" ]; then
         --data-dir "$DATA_DIR" \
         --ensemble-dir "$ENSEMBLE_DIR" \
         --output-dir "$OUTPUT_DIR" \
-        --score-min -1200 \
-        --score-max -0 \
-        --drmsd-max 5.0
+        --drmsd-max 3.0
 fi
