@@ -2,10 +2,10 @@
 #$ -S /bin/bash
 #$ -N filter_ai-cath
 #$ -cwd
-#$ -l h_rt=52:00:00
-#$ -l mem_free=16G
-#$ -o logs/filter_ai-cath_04172026_$JOB_ID.out
-#$ -e logs/filter_ai-cath_04172026_$JOB_ID.err
+#$ -l h_rt=72:00:00
+#$ -l mem_free=128G
+#$ -o logs/filter_ai-cath_04192026_$JOB_ID.out
+#$ -e logs/filter_ai-cath_04192026_$JOB_ID.err
 #$ -m bea
 #$ -M jqmo@berkeley.edu
 
