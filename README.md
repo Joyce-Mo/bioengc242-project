@@ -34,4 +34,12 @@ This is a work in progress!! Until the project submission. For now, scripts cont
 
 The flow-matching diffusion model is actually in a different repo, as a forked protpardelle that's been adapted for this specific project. 
 
-The created conformational emsembles are on box.com for storage. 
+The created conformational emsembles are on box.com for storage.
+
+# HPC notes
+
+## Expanse (SDSC)
+- Account: `ucb368`, allocation is on **gpu-shared** partition only. The `shared` (CPU-only) partition will reject jobs with "Project not found".
+- All batch jobs (even CPU-only work like featurization or tar archiving) must use `-p gpu-shared` with `--gpus=1`.
+- `ucb368` has a low `MaxSubmitJobsPerAccount` limit. Keep array sizes small (e.g. `--array=1-16`). Even with a `%N` throttle, SLURM counts all pending array tasks against the submit limit.
+- Long-running commands (tar, featurization) must be submitted as batch jobs, not run on the login node. SSH sessions to Expanse time out and kill foreground processes.
