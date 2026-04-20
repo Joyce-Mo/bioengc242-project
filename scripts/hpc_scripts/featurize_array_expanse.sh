@@ -1,33 +1,29 @@
 #!/bin/bash
 #SBATCH -A ucb368
-#SBATCH --job-name=featurize
+#SBATCH --job-name=featurize_ai-cath
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
 #SBATCH --gpus=1
 #SBATCH --mem=16G
-#SBATCH --time=24:00:00
-#SBATCH -o logs/featurize_04192026_%j.out
-#SBATCH -e logs/featurize_04192026_%j.err
+#SBATCH --time=12:00:00
+#SBATCH -o logs/featurize_ai-cath_04182026_%j.out
+#SBATCH -e logs/featurize_ai-cath_04182026_%j.err
 #SBATCH -p gpu-shared
-#SBATCH --array=1-16
+#SBATCH --array=1-4
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
-# Parallel featurization of PDBs into (C, L, L) .npy stacks for vae.py.
+# Featurize training-subset PDBs into (C, L, L) .npy stacks for vae.py.
 #
-# Splits the full PDB list into 16 chunks and processes one chunk per
-# SLURM array task. Each chunk is ~21k PDBs. Expanse ucb368 has a low
-# MaxSubmitJobsPerAccount limit, so keep the array size small.
+# train_pdb_keys.list contains bare filenames (no directory prefix), so
+# we prepend PDB_DIR at runtime. 4 array tasks split ~337k PDBs into
+# ~84k each. Total cost: 4 x 12h = 48 GPU-hours.
+#
+# Idempotent: already-featurized PDBs (existing .npy) are skipped, so
+# if any task times out, just resubmit and it picks up where it left off.
 #
 # Run BEFORE train_vae_production_expanse.sh or sweep_vae_expanse.sh.
-#
-# To submit:
-#   sbatch scripts/hpc_scripts/featurize_array_expanse.sh
-#
-# To submit training after featurization completes:
-#   FEAT_JOB=$(sbatch --parsable scripts/hpc_scripts/featurize_array_expanse.sh)
-#   sbatch --dependency=afterok:$FEAT_JOB scripts/hpc_scripts/train_vae_production_expanse.sh
 
 set -euo pipefail
 
@@ -43,17 +39,26 @@ REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
 PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree"
+KEYS_FILE="${PDB_DIR}/train_pdb_keys.list"
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
-N_TASKS=16  # must match --array upper bound
+N_TASKS=4  # must match --array upper bound
 
 mkdir -p "$FEATURE_DIR" logs
 
+# train_pdb_keys.list has bare filenames; prepend PDB_DIR to get full paths
+FULL_PATH_LIST="${FEATURE_DIR}/train_pdb_fullpaths.txt"
+sed "s|^|${PDB_DIR}/|" "$KEYS_FILE" > "$FULL_PATH_LIST"
+
+TOTAL=$(wc -l < "$KEYS_FILE")
+N_EXIST=$(find "$FEATURE_DIR" -name '*.npy' 2>/dev/null | wc -l)
+echo "PDB list: $KEYS_FILE ($TOTAL entries, $N_EXIST already featurized)"
 echo "Featurize chunk ${SLURM_ARRAY_TASK_ID} / ${N_TASKS}"
 
 python vae/featurize_pdb.py \
-    --pdb-dir "$PDB_DIR" \
+    --pdb-list "$FULL_PATH_LIST" \
     --outdir "$FEATURE_DIR" \
     --task-id "$SLURM_ARRAY_TASK_ID" \
     --n-tasks "$N_TASKS"
 
 echo "Done: chunk ${SLURM_ARRAY_TASK_ID}"
+echo "Total features now: $(find "$FEATURE_DIR" -name '*.npy' | wc -l)"
