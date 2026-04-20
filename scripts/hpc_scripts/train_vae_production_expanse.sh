@@ -37,23 +37,23 @@ python -c "import torch; print('torch', torch.__version__, 'cuda runtime', torch
 REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
-PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree"
+# Paths
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
 OUTPUT_DIR="/expanse/lustre/scratch/jmo/temp_project/vae_production_${SLURM_JOB_ID}"
 
-mkdir -p "$FEATURE_DIR" "$OUTPUT_DIR" logs
+mkdir -p "$OUTPUT_DIR" logs
 
-# ── Featurize (skip if already done) ─────────────────────────────────────────
-n_pdbs=$(find "$PDB_DIR" -type f -name "*.pdb" 2>/dev/null | wc -l)
+# Verify features exist (featurization must be run separately via
+# featurize_array_expanse.sh before submitting this job)
 n_npys=$(find "$FEATURE_DIR" -type f -name "*.npy" 2>/dev/null | wc -l)
-
-if [ "$n_npys" -ge "$n_pdbs" ] && [ "$n_pdbs" -gt 0 ]; then
-    echo "Features already exist ($n_npys .npy files) — skipping featurization"
-else
-    echo "Featurizing $n_pdbs PDBs..."
-    python vae/featurize_pdb.py --pdb-dir "$PDB_DIR" --outdir "$FEATURE_DIR"
+if [ "$n_npys" -eq 0 ]; then
+    echo "ERROR: No .npy features in $FEATURE_DIR"
+    echo "Run featurize_array_expanse.sh first:"
+    echo "  FEAT_JOB=\$(sbatch --parsable scripts/hpc_scripts/featurize_array_expanse.sh)"
+    echo "  sbatch --dependency=afterok:\$FEAT_JOB scripts/hpc_scripts/train_vae_production_expanse.sh"
+    exit 1
 fi
+echo "Found $n_npys feature files in $FEATURE_DIR"
 
 # ── Best hyperparameters from sweep (UPDATE AFTER SWEEP) ─────────────────────
 # These are reasonable defaults; replace with actual best config from sweep.

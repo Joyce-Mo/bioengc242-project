@@ -29,6 +29,8 @@ Usage: python vae/featurize_pdb.py --pdb path/to/pdb --outdir features/
 
 from __future__ import print_function
 import argparse
+import math
+import os
 import sys
 import warnings
 from pathlib import Path
@@ -208,27 +210,51 @@ def featurize_pdb(pdb_path):
 
 def _gather_pdb_paths(args):
     """Resolve the list of PDB paths to process from --pdb / --pdb-dir /
-    --pdb-list (+ optional --task-id for SLURM array jobs)."""
-    if args.pdb:
-        return [args.pdb]
+    --pdb-list, then optionally slice into a chunk for SLURM array jobs
+    via --task-id and --n-tasks.
 
-    if args.pdb_dir:
+    Chunking: when --task-id T and --n-tasks N are both given, the full
+    path list is split into N roughly-equal chunks and only chunk T is
+    returned (1-indexed to match SLURM $SLURM_ARRAY_TASK_ID + 1).
+    If only --task-id is given without --n-tasks, it falls back to
+    selecting a single path (backwards-compatible with earlier usage).
+    """
+    # Step 1: resolve all paths from the chosen input mode
+    if args.pdb:
+        paths = [args.pdb]
+    elif args.pdb_dir:
         paths = sorted(str(p) for p in Path(args.pdb_dir).rglob("*.pdb"))
         if not paths:
             raise SystemExit(f"no .pdb files found under {args.pdb_dir}")
-        return paths
-
-    if args.pdb_list:
+    elif args.pdb_list:
         with open(args.pdb_list) as fh:
             paths = [line.strip() for line in fh if line.strip()]
-        if args.task_id is not None:
-            idx = args.task_id - 1  # SLURM array IDs are 1-indexed
-            if idx < 0 or idx >= len(paths):
-                raise SystemExit(f"task_id {args.task_id} out of range (1-{len(paths)})")
-            return [paths[idx]]
-        return paths
+        if not paths:
+            raise SystemExit(f"no paths in {args.pdb_list}")
+    else:
+        raise SystemExit("provide one of --pdb, --pdb-dir, or --pdb-list")
 
-    raise SystemExit("provide one of --pdb, --pdb-dir, or --pdb-list")
+    # Step 2: apply SLURM array chunking if requested
+    if args.task_id is not None:
+        if args.n_tasks is not None:
+            # Chunked mode: split paths into n_tasks chunks, return chunk task_id
+            chunk_size = math.ceil(len(paths) / args.n_tasks)
+            start = (args.task_id - 1) * chunk_size
+            end = min(start + chunk_size, len(paths))
+            if start >= len(paths):
+                print(f"task_id {args.task_id} exceeds path count "
+                      f"({len(paths)} PDBs / {args.n_tasks} tasks); nothing to do")
+                return []
+            paths = paths[start:end]
+        else:
+            # Legacy single-path mode (backwards compat)
+            idx = args.task_id - 1
+            if idx < 0 or idx >= len(paths):
+                raise SystemExit(
+                    f"task_id {args.task_id} out of range (1-{len(paths)})")
+            paths = [paths[idx]]
+
+    return paths
 
 
 def main():
@@ -238,7 +264,11 @@ def main():
     src.add_argument("--pdb-dir", type=str, help="directory of PDBs (recursively globbed)")
     src.add_argument("--pdb-list", type=str, help="text file with one PDB path per line")
     parser.add_argument("--task-id", type=int, default=None,
-                        help="1-indexed SLURM array task id (with --pdb-list)")
+                        help="1-indexed SLURM array task id; selects a chunk of "
+                             "PDBs to process (works with any input mode)")
+    parser.add_argument("--n-tasks", type=int, default=None,
+                        help="total number of SLURM array tasks; splits the PDB "
+                             "list into --n-tasks equal chunks (requires --task-id)")
     parser.add_argument("--outdir", type=str, required=True,
                         help="directory to write {stem}.npy files into")
     parser.add_argument("--overwrite", action="store_true",
@@ -251,11 +281,16 @@ def main():
     pdb_paths = _gather_pdb_paths(args)
     print(f"featurizing {len(pdb_paths)} PDB(s) -> {outdir}")
 
-    n_ok, n_skip, n_fail = 0, 0, 0
+    n_ok, n_skip, n_fail, n_empty = 0, 0, 0, 0
     for pdb_path in pdb_paths:
         out_path = outdir / f"{Path(pdb_path).stem}.npy"
         if out_path.exists() and not args.overwrite:
             n_skip += 1
+            continue
+        # Quick check: skip 0-byte files without invoking BioPython
+        if os.path.getsize(pdb_path) == 0:
+            n_empty += 1
+            print(f"  SKIP {pdb_path}: 0-byte file", file=sys.stderr)
             continue
         try:
             feats = featurize_pdb(pdb_path)
@@ -267,7 +302,8 @@ def main():
         n_ok += 1
         print(f"  wrote {out_path}  shape={feats.shape}")
 
-    print(f"done: {n_ok} written, {n_skip} skipped (exist), {n_fail} failed")
+    print(f"done: {n_ok} written, {n_skip} skipped (exist), "
+          f"{n_empty} skipped (empty), {n_fail} failed")
 
 
 if __name__ == "__main__":
