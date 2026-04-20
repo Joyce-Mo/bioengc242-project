@@ -4,12 +4,13 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
+#SBATCH --gpus=1
 #SBATCH --mem=16G
 #SBATCH --time=24:00:00
 #SBATCH -o logs/featurize_04192026_%j.out
-#SBATCH -e logs/featurize_04192026_%A_%j.err
-#SBATCH -p shared
-#SBATCH --array=1-100
+#SBATCH -e logs/featurize_04192026_%j.err
+#SBATCH -p gpu-shared
+#SBATCH --array=1-100%4
 #SBATCH --mail-user=jqmo@berkeley.edu
 #SBATCH --mail-type=all
 
