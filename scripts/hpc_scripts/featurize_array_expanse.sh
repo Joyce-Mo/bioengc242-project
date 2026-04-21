@@ -39,11 +39,11 @@ REPO_ROOT="/expanse/lustre/scratch/jmo/temp_project/bioengc242-project"
 cd "$REPO_ROOT"
 
 PDB_DIR="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree/mpnn_esmfold"
-KEYS_FILE="${PDB_DIR}/train_pdb_keys.list"
+KEYS_FILE="/expanse/lustre/scratch/jmo/temp_project/augmented_ingraham_cath_bugfree/train_pdb_keys.list"
 FEATURE_DIR="/expanse/lustre/scratch/jmo/temp_project/ai-cath_vae_features"
 N_TASKS=4  # must match --array upper bound
 
-mkdir -p "$FEATURE_DIR" logs
+mkdir -p "$FEATURE_DIR" 
 
 # train_pdb_keys.list has bare filenames; prepend PDB_DIR to get full paths
 FULL_PATH_LIST="${FEATURE_DIR}/train_pdb_fullpaths.txt"
