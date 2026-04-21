@@ -45,9 +45,21 @@ N_TASKS=4  # must match --array upper bound
 
 mkdir -p "$FEATURE_DIR" 
 
-# train_pdb_keys.list has bare filenames; prepend PDB_DIR to get full paths
+# train_pdb_keys.list has bare filenames, but PDBs live in subdirectories
+# under PDB_DIR. Build an index of actual paths, then look up each key.
 FULL_PATH_LIST="${FEATURE_DIR}/train_pdb_fullpaths.txt"
-sed "s|^|${PDB_DIR}/|" "$KEYS_FILE" > "$FULL_PATH_LIST"
+echo "Indexing PDB files under ${PDB_DIR} ..."
+find "$PDB_DIR" -name '*.pdb' -type f > "${FEATURE_DIR}/_all_pdb_paths.txt"
+echo "  Found $(wc -l < "${FEATURE_DIR}/_all_pdb_paths.txt") total PDB files"
+
+# Create a basename -> full-path lookup via awk, then join with the keys file
+awk -F/ '{print $NF, $0}' "${FEATURE_DIR}/_all_pdb_paths.txt" | sort -k1,1 \
+    > "${FEATURE_DIR}/_pdb_path_index.txt"
+sort "$KEYS_FILE" | join -o 2.2 - "${FEATURE_DIR}/_pdb_path_index.txt" \
+    > "$FULL_PATH_LIST"
+
+N_FOUND=$(wc -l < "$FULL_PATH_LIST")
+echo "  Matched ${N_FOUND} / $(wc -l < "$KEYS_FILE") keys to actual paths"
 
 TOTAL=$(wc -l < "$KEYS_FILE")
 N_EXIST=$(find "$FEATURE_DIR" -name '*.npy' 2>/dev/null | wc -l)
