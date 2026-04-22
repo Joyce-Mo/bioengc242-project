@@ -2,17 +2,17 @@
 #$ -S /bin/bash
 #$ -N backrub
 #$ -cwd
-#$ -t 1-100000
+#$ -t 1-20000
 #$ -tc 200
 #$ -l h_rt=24:00:00 
 #$ -l mem_free=8G
-#$ -o logs/backrub_04082026_$JOB_ID.out
-#$ -e logs/backrub_04082026_$JOB_ID.err
+#$ -o logs/backrub_04222026_$JOB_ID.out
+#$ -e logs/backrub_04222026_$JOB_ID.err
 
 source activate mcsce
 
-PDB_LIST="pdb_list.txt"
-OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_redo_1"
+PDB_LIST="/wynton/scratch/jqmo/rotation_datasets/ai_cath_training_filtered/kept_pdb_list.txt"
+OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_filtered_training_backrub"
 SUBSET_DIR="/wynton/scratch/jqmo/rotation_datasets"
 NCONFS=15
 NSTEPS=10000
