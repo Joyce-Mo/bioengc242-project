@@ -1,11 +1,11 @@
 #!/bin/bash
 #$ -S /bin/bash
-#$ -N filter_ai-cath
+#$ -N filter_backrub
 #$ -cwd
 #$ -l h_rt=72:00:00
 #$ -l mem_free=128G
-#$ -o logs/filter_ai-cath_04192026_$JOB_ID.out
-#$ -e logs/filter_ai-cath_04192026_$JOB_ID.err
+#$ -o logs/filter_backrub_04242026_$JOB_ID.out
+#$ -e logs/filter_backrub_04242026_$JOB_ID.err
 #$ -m bea
 #$ -M jqmo@berkeley.edu
 
@@ -14,7 +14,7 @@ source activate mcsce
 #  Mode selection 
 # Set MODE=pdb_list to validate the flat training dataset (pre-backrub).
 # Set MODE=ensemble to filter backrub conformers vs originals (post-backrub).
-MODE="${MODE:-pdb_list}"
+MODE="${MODE:-ensemble}"
 
 if [ "$MODE" = "pdb_list" ]; then
     # Validate the ai-cath training PDB dataset
@@ -31,8 +31,8 @@ if [ "$MODE" = "pdb_list" ]; then
 elif [ "$MODE" = "ensemble" ]; then
     # Filter backrub ensembles vs originals
     DATA_DIR="/wynton/scratch/jqmo/rotation_datasets"
-    OUTPUT_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_filtered"
-    ENSEMBLE_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_redo_1"
+    OUTPUT_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_backrub_filtered_04242026"
+    ENSEMBLE_DIR="/wynton/scratch/jqmo/rotation_datasets/ai_cath_filtered_training_backrub"
 
     python scripts/data_preparation/filter_backrub_quality.py \
         --data-dir "$DATA_DIR" \

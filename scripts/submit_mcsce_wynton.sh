@@ -2,13 +2,13 @@
 #$ -S /bin/bash
 #$ -N mcsce
 #$ -cwd
-#$ -t 1-30
+#$ -t 1-20000  
 #$ -tc 200
 #$ -l h_rt=00:10:00
 #$ -l mem_free=48G
 #$ -l scratch=10G
-#$ -o logs/mcsce_04082026_$JOB_ID.out
-#$ -e logs/mcsce_04082026_$JOB_ID.err
+#$ -o logs/mcsce_04242026_$JOB_ID.out
+#$ -e logs/mcsce_04242026_$JOB_ID.err
 #$ -r y
 #$ -m n
 #$ -M jqmo@berkeley.edu
@@ -24,8 +24,8 @@ export MCSCE_PRECOMPUTE_DIR="/wynton/home/rotation/jqmo/rotation3/mcsce-precompu
 
 # /wynton/scratch/jqmo/rotation_datasets/augmented_ingraham_cath_bugfree/mpnn_esmfold 
 
-PDB_LIST="pdb_list_ai-cath_subset.txt"
-OUTDIR="/wynton/scratch/jqmo/rotation_datasets/ai-cath_mcsce_ensembles"
+PDB_LIST="/wynton/scratch/jqmo/rotation_datasets/ai_cath_training_filtered/kept_pdb_list.txt"
+OUTDIR="/wynton/scratch/jqmo/rotation_datasets/final_ai-cath_mcsce_ensembles"
 NCONFS=100
 FAILED_LOG="logs/mcsce_failed_pdbs.txt"
 
