@@ -1,6 +1,8 @@
 # bioengc242-project
 Class project on mapping multi-conformer protein ensemble with diffusion models. 
 
+The protpardelle code used for this project is in: https://github.com/Joyce-Mo/protpardelle-1c 
+
 # Project details (from proposal)
 
 Current protein structure predictors, such as AlphaFold3 (AF3), infer native structures of proteins with high accuracy.  However, these models display poor diversity, limiting the ability to model ensembles of dynamic proteins or fit experimental data.  Recent efforts have shown that smaller models can approach the performance of AF3-type models, but yield better diversity and more realistic dynamics. This project is focused on the design of new protein folding models specific to the objective of mapping to multi-conformer datasets. This dataset includes multi-conformer ensembles fit to density maps from X-ray diffraction and cryo-EM structures (~40 PDBs) and synthetic data generated from Monte Carlo sampling for side-chain rotamers (15k PDB files from CATH20 + supplement from Monte Carlo side chain entropy method by Asmit Bhowmick and Teresa Head-Gordon ). 
@@ -35,11 +37,3 @@ This is a work in progress!! Until the project submission. For now, scripts cont
 The flow-matching diffusion model is actually in a different repo, as a forked protpardelle that's been adapted for this specific project. 
 
 The created conformational emsembles are on box.com for storage.
-
-# HPC notes
-
-## Expanse (SDSC)
-- Account: `ucb368`, allocation is on **gpu-shared** partition only. The `shared` (CPU-only) partition will reject jobs with "Project not found".
-- All batch jobs (even CPU-only work like featurization or tar archiving) must use `-p gpu-shared` with `--gpus=1`.
-- `ucb368` has a low `MaxSubmitJobsPerAccount` limit. Keep array sizes small (e.g. `--array=1-16`). Even with a `%N` throttle, SLURM counts all pending array tasks against the submit limit.
-- Long-running commands (tar, featurization) must be submitted as batch jobs, not run on the login node. SSH sessions to Expanse time out and kill foreground processes.
