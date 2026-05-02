@@ -34,6 +34,6 @@ This is a work in progress!! Until the project submission. For now, scripts cont
 /logs contains some of the output and error files from sun grid engine or slurm jobs. 
 /vae contains the VAE model for checkpoint #2. 
 
-The flow-matching diffusion model is actually in a different repo, as a forked protpardelle that's been adapted for this specific project. 
+The flow-matching diffusion model is actually in a different repo, as a forked protpardelle that's been adapted for this specific project. The link to the diffusion model is here: https://github.com/Joyce-Mo/protpardelle-1c 
 
 The created conformational emsembles are on box.com for storage.
