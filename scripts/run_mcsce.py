@@ -71,14 +71,12 @@ if multiprocessing.get_start_method() != "spawn":
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
 sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buffering=1)
 
-# ---------------------------------------------------------------------------
 # Path to local mcsce-precompute checkout. Override per-host by exporting
 # MCSCE_PRECOMPUTE_DIR before launching this script (e.g. in your sbatch /
 # qsub wrapper). Otherwise the local-laptop default below is used.
 #
 # The directory uses bare imports (e.g. `from protein_data import PDBData`),
 # so we have to add it to sys.path before importing ensemble_gen.
-# ---------------------------------------------------------------------------
 MCSCE_PRECOMPUTE_DIR = os.environ.get(
     "MCSCE_PRECOMPUTE_DIR",
     "/wynton/home/rotation/jqmo/rotation3/mcsce-precompute"

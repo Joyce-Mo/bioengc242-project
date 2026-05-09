@@ -42,18 +42,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
 # Set paths — defaults point to the foldseek-filtered dataset produced by
 # foldseek_tm_filter.py, so this script focuses on visualization/analysis.
-# ---------------------------------------------------------------------------
 DEFAULT_PDB_DIR = "/Users/joycemo/Documents/PhD/Rotation3/dataset/initial_dataset_40/pdb_filtered_foldseek_filtered"
 DEFAULT_OUTPUT_DIR = "output/Karson_data_foldseek"
 DEFAULT_RESULTS_TSV = "/Users/joycemo/Documents/PhD/Rotation3/dataset/initial_dataset_40/pdb_filtered_foldseek_filtered/foldseek_results.tsv"
 
-# ---------------------------------------------------------------------------
 # Foldseek output columns for --format-output
-# ---------------------------------------------------------------------------
-
 # Fields we request from foldseek easy-search
 FOLDSEEK_COLUMNS = [
     "query",       # query protein name
@@ -79,10 +74,7 @@ FOLDSEEK_COLUMNS = [
 FOLDSEEK_FORMAT_STR = ",".join(FOLDSEEK_COLUMNS)
 
 
-# ---------------------------------------------------------------------------
 # Step 1: Run foldseek all-vs-all
-# ---------------------------------------------------------------------------
-
 def run_foldseek(pdb_dir, output_dir, threads=4):
     """Run foldseek easy-search in all-vs-all mode on the PDB directory.
 
@@ -129,10 +121,7 @@ def run_foldseek(pdb_dir, output_dir, threads=4):
     return results_path
 
 
-# ---------------------------------------------------------------------------
 # Step 2: Parse results
-# ---------------------------------------------------------------------------
-
 def load_results(results_path):
     """Load foldseek results TSV into a DataFrame.
 
@@ -157,10 +146,7 @@ def load_results(results_path):
     return df
 
 
-# ---------------------------------------------------------------------------
 # Step 3: Build pairwise matrices
-# ---------------------------------------------------------------------------
-
 def build_pairwise_matrix(df, metric, proteins):
     """Build a symmetric pairwise matrix from alignment results.
 
@@ -210,10 +196,7 @@ def build_pairwise_matrix(df, metric, proteins):
     return mat
 
 
-# ---------------------------------------------------------------------------
 # Step 4: Compute pairwise Cα DRMSD
-# ---------------------------------------------------------------------------
-
 def _get_ca_coords(pdb_path):
     """Extract Cα coordinates from the first model/chain of a PDB file.
 
@@ -334,10 +317,7 @@ def compute_pairwise_drmsd(pdb_dir, proteins):
     return drmsd_mat
 
 
-# ---------------------------------------------------------------------------
 # Step 5: Figures
-# ---------------------------------------------------------------------------
-
 def plot_metric_distribution(df, metric, label, units, output_path):
     """Plot violin + histogram of a structural metric (excluding self-hits).
 
@@ -635,10 +615,7 @@ def plot_embedding(matrix, proteins, method_name, output_path):
     logger.info("Saved %s embedding: %s", method_name, output_path)
 
 
-# ---------------------------------------------------------------------------
 # Step 6: Correlation table
-# ---------------------------------------------------------------------------
-
 def compute_correlation_table(df, output_path):
     """Compute and save a correlation table between structural metrics.
 
@@ -709,10 +686,7 @@ def plot_correlation_heatmap(corr, output_path):
     logger.info("Saved correlation heatmap: %s", output_path)
 
 
-# ---------------------------------------------------------------------------
 # Main pipeline
-# ---------------------------------------------------------------------------
-
 def main():
     """Entry point for foldseek structural analysis pipeline."""
     parser = argparse.ArgumentParser(
@@ -759,7 +733,7 @@ def main():
         logger.error("PDB directory does not exist: %s", pdb_dir)
         sys.exit(1)
 
-    # ---- Step 1: Load or run foldseek ----
+    # Step 1: Load or run foldseek
     # By default, use the pre-computed results TSV from foldseek_tm_filter.py.
     # Only run foldseek if --run-foldseek is explicitly passed.
     results_path = Path(args.results_tsv)
@@ -772,7 +746,7 @@ def main():
                       "or pass --run-foldseek to run it here.", results_path)
         sys.exit(1)
 
-    # ---- Step 2: Load results ----
+    # Step 2: Load results
     df = load_results(results_path)
 
     if df.empty:
@@ -785,7 +759,7 @@ def main():
     logger.info("Total unique proteins: %d (showing %d in heatmaps)",
                 len(all_proteins), len(heatmap_proteins))
 
-    # ---- Step 3: Distributions ----
+    # Step 3: Distributions
     plot_metric_distribution(
         df, "alntmscore", "TM-score", "0-1",
         figures_dir / "tmscore_distribution.png",
@@ -799,7 +773,7 @@ def main():
         figures_dir / "seqid_distribution.png",
     )
 
-    # ---- Step 4: Pairwise heatmaps from foldseek ----
+    # Step 4: Pairwise heatmaps from foldseek
     tm_matrix = build_pairwise_matrix(df, "alntmscore", heatmap_proteins)
     plot_pairwise_heatmap(
         tm_matrix, heatmap_proteins, "TM-score",
@@ -814,19 +788,19 @@ def main():
         cmap="viridis_r",
     )
 
-    # ---- Step 5: Position-by-position alignment ----
+    # Step 5: Position-by-position alignment
     plot_position_alignment_heatmap(
         df, figures_dir / "position_alignment_heatmap.png",
         max_proteins=min(100, len(all_proteins)),
     )
 
-    # ---- Step 6: Per-protein residue alignment ----
+    # Step 6: Per-protein residue alignment
     plot_residue_alignment_per_protein(
         df, figures_dir / "residue_alignment_per_protein.png",
         max_proteins=50,
     )
 
-    # ---- Step 7: Pairwise Cα DRMSD ----
+    # Step 7: Pairwise Cα DRMSD
     if not args.skip_drmsd:
         drmsd_matrix = compute_pairwise_drmsd(pdb_dir, heatmap_proteins)
         plot_pairwise_heatmap(
@@ -841,7 +815,7 @@ def main():
         # Fall back to using (1 - TM-score) as a distance proxy for embeddings
         dist_matrix = 1.0 - tm_matrix
 
-    # ---- Step 8: UMAP and MDS embeddings ----
+    # Step 8: UMAP and MDS embeddings
     if len(heatmap_proteins) >= 5:
         plot_embedding(
             dist_matrix, heatmap_proteins, "UMAP",
@@ -854,11 +828,11 @@ def main():
     else:
         logger.warning("Too few proteins (%d) for meaningful embeddings.", len(heatmap_proteins))
 
-    # ---- Step 9: Correlation table ----
+    # Step 9: Correlation table
     corr = compute_correlation_table(df, output_dir / "correlation_table.csv")
     plot_correlation_heatmap(corr, figures_dir / "correlation_heatmap.png")
 
-    # ---- Summary ----
+    # Summary
     print(f"\nAll outputs saved to: {output_dir}")
     print(f"  Figures: {figures_dir}/")
     print(f"  Correlation table: {output_dir / 'correlation_table.csv'}")

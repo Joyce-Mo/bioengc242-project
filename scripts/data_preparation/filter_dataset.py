@@ -197,7 +197,7 @@ def filter_pdb(pdb_path, output_path, max_residues):
 
     model = structure[0]
 
-    # --- Collect per-file statistics ---
+    # Collect per-file statistics
     stats = {
         "name": pdb_path.name,
         "original_residues": 0,

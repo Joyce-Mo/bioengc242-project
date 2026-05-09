@@ -2,7 +2,7 @@
 #$ -S /bin/bash
 #$ -N filter_backrub
 #$ -cwd
-#$ -l h_rt=72:00:00
+#$ -l h_rt=100:00:00
 #$ -l mem_free=128G
 #$ -o logs/filter_backrub_04242026_$JOB_ID.out
 #$ -e logs/filter_backrub_04242026_$JOB_ID.err

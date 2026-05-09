@@ -1,0 +1,124 @@
+# Protpardelle cc89 with REPA alignment to VAE per-residue features.
+#
+# Uses the VAE's featurized per-residue representations (diagonal + row
+# pooling of the 7-channel feature map) as expert features for CKA-based
+# representation alignment. This couples the VAE's learned structural
+# understanding with protpardelle's all-atom diffusion model.
+#
+# The VAE features encode:
+#   - CA-CA and CB-CB distance relationships (channels 0-1)
+#   - Contact patterns (channel 2)
+#   - Amino acid properties: hydrophobicity, charge, polarity (channels 3-5)
+#   - Solvent accessibility (channel 6)
+#
+# Per-residue features are extracted via diagonal + row-mean + row-max
+# pooling, giving D=21 per residue. These are saved as .pt files by:
+#   python scripts/extract_vae_repa_features.py \
+#       --pdb-dir /anvil/scratch/x-jmo/datasets/augmented_ingraham_cath_bugfree \
+#       --output-dir /anvil/scratch/x-jmo/datasets/vae_repa_features_pooled \
+#       --mode pooled
+#
+# Copy this file to protpardelle-1c/model_params/configs/ before training.
+train:
+  seed: null
+  ckpt_path: null
+  batch_size: 32
+  max_epochs: 10000
+  eval_freq: 8000000
+  checkpoint_freq: 1
+  checkpoints: []
+  lr: 0.0001
+  warmup_steps: 1000
+  decay_steps: 2_000_000
+  use_amp: False
+  clip_grad_norm: True
+  grad_clip_val: 1.0
+  weight_decay: 0.0
+  self_cond_train_prob: 0.9
+  loss_type: "edm"
+  crop_conditional: True
+  crop_cond:
+    contiguous_prob: 0.05
+    discontiguous_prob: 0.9
+    sidechain_prob: 0.9
+    sidechain_only_prob: 0.0
+    max_span_len: 12
+    max_discontiguous_res: 24
+    dist_threshold: 45.0
+    recenter_coords: True
+
+data:
+  pdb_paths: ["/anvil/scratch/x-jmo/datasets/augmented_ingraham_cath_bugfree"]
+  mixing_ratios: [1.0]
+  fixed_size: 512
+  n_aatype_tokens: 21
+  short_epoch: 0
+  num_workers: 8
+  se3_data_augment: True
+  translation_scale: 1.0
+  chain_residx_gap: 200
+  sigma_data: 10.01
+  auto_calc_sigma_data: True
+  n_examples_for_sigma_data: 512
+  dummy_fill_mode: "zero"
+  subset: ["train_pdb_keys.list"]
+  num_atom_perturbations: 1
+  optimal_atom_permutation: True
+
+diffusion:
+  training:
+    function: "lognormal"
+    psigma_mean: -0.5
+    psigma_std: 1.5
+  sampling:
+    function: "uniform"
+    s_min: 0.001
+    s_max: 80.0
+
+model:
+  task: "ai-allatom"
+  pretrained_modules: []
+  struct_model_checkpoint: ""
+  mpnn_model_checkpoint: ""
+  crop_conditional: True
+  conditioning_style: "concat"
+  compute_loss_on_all_atoms: false
+  struct_model:
+    arch: "dit"
+    n_atoms: 37
+    n_channel: 256
+    noise_cond_mult: 4
+    uvit:
+      patch_size: 1
+      n_layers: 10
+      n_heads: 8
+      dim_head: 32
+      n_filt_per_layer: []
+      n_blocks_per_layer: 2
+      cat_pwd_to_conv: False
+      conv_skip_connection: False
+      position_embedding_type: "rotary"
+      position_embedding_max: 32
+  mpnn_model:
+    use_self_conditioning: True
+    label_smoothing: 0.1
+    n_channel: 128
+    n_layers: 3
+    n_neighbors: 32
+    noise_cond_mult: 4
+
+# REPA: align protpardelle transformer layer 4 with VAE per-residue features.
+# The projector maps protpardelle's 256-dim hidden states to 21-dim VAE
+# feature space via a 2-layer Conv1d stack, then CKA loss encourages the
+# diffusion model to learn representations consistent with the VAE's
+# structural encoding.
+repalign:
+  enable: True
+  expert_repr_path: "/anvil/scratch/x-jmo/datasets/vae_repa_features_pooled"
+  align_layer: 4                # 1-indexed; hooks transformer block 3 (of 10)
+  expert_dim: 21                # 7 channels * 3 pooling ops (diag + mean + max)
+  projector_hidden_dim: 128     # smaller than F2S (512) since expert_dim is small
+  projector_kernel_size: 3
+  projector_num_layers: 2
+  loss_weight: 0.5
+  linear_cka: True
